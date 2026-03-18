@@ -1,39 +1,84 @@
-// ── ITD Imager v2 — Senior-level app.js ──
-// Crop editor + Octree quantization + Mobile bookmarklet
+/**
+ * ITD Imager v2
+ *
+ * Веб-инструмент для подготовки и автозагрузки изображений (баннеров/постов) на платформу ИТД.
+ * Включает: интерактивный crop-редактор, Median-Cut квантизацию цветов,
+ * генерацию скриптов для API-загрузки и мобильный букмарклет.
+ *
+ * @file app.js
+ * @author nersuga
+ */
 
 (function () {
   'use strict';
 
   // ═════════════════════════════════════
-  // Config
+  // Конфигурация
   // ═════════════════════════════════════
+
+  /**
+   * Допустимые размеры холста [ширина, высота] в пикселях.
+   * @type {Object<string, [number, number]>}
+   */
   const SIZES = { banner: [1100, 380], post: [800, 500] };
-  const MIN_ZOOM = 1, MAX_ZOOM = 5, ZOOM_STEP = 0.15;
+
+  /** Минимальный допустимый зум */
+  const MIN_ZOOM = 1;
+  /** Максимальный допустимый зум */
+  const MAX_ZOOM = 5;
+  /** Шаг зума при одном скролле / нажатии кнопки */
+  const ZOOM_STEP = 0.15;
 
   // ═════════════════════════════════════
-  // State
+  // Глобальное состояние приложения
   // ═════════════════════════════════════
+
+  /**
+   * @typedef {Object} AppState
+   * @property {HTMLImageElement|null} img       — загруженное изображение
+   * @property {'api'|'draw'}          mode      — текущий режим работы
+   * @property {'banner'|'post'}       type      — тип холста
+   * @property {string}                quality   — формат/качество вывода (например 'jpeg-85')
+   * @property {number}                colors    — количество цветов для квантизации
+   * @property {number}                brush     — размер кисти (px)
+   * @property {number}                speed     — задержка рисования (ms)
+   * @property {number}                zoom      — текущий зум (1 = 100%)
+   * @property {number}                panX      — смещение по X (в пикселях изображения)
+   * @property {number}                panY      — смещение по Y (в пикселях изображения)
+   * @property {Object|null}           quantized — результат квантизации {palette, indexed, W, H}
+   * @property {string|null}           script    — сгенерированный скрипт
+   */
+
+  /** @type {AppState} */
   const S = {
-    img: null,           // HTMLImageElement
-    mode: 'api',         // 'api' | 'draw'
+    img: null,
+    mode: 'api',
     type: 'banner',
     quality: 'jpeg-85',
     colors: 64,
     brush: 4,
     speed: 1,
-    // Crop state
     zoom: 1,
-    panX: 0, panY: 0,   // offset as ratio of movable range (0 = center)
-    // Computed
+    panX: 0, panY: 0,
     quantized: null,
     script: null,
   };
 
   // ═════════════════════════════════════
-  // DOM refs
+  // DOM-элементы
   // ═════════════════════════════════════
+
+  /**
+   * Получить DOM-элемент по ID.
+   * @param {string} id — идентификатор элемента
+   * @returns {HTMLElement|null}
+   */
   const $ = id => document.getElementById(id);
+
+  /** @type {Object<string, HTMLElement>} — кэш DOM-элементов */
   const dom = {};
+
+  /** Список ID всех используемых элементов */
   const IDS = [
     'dropzone','fileInput','cropEditor','cropCanvas','cropHint','cropControls',
     'zoomInfo','zoomIn','zoomOut','zoomReset',
@@ -49,8 +94,13 @@
   IDS.forEach(id => dom[id] = $(id));
 
   // ═════════════════════════════════════
-  // Format helper
+  // Вспомогательные функции формата
   // ═════════════════════════════════════
+
+  /**
+   * Возвращает параметры формата изображения на основе текущей настройки качества.
+   * @returns {[string, number|undefined, string]} — [MIME-тип, качество (0–1), расширение файла]
+   */
   function fmt() {
     const q = S.quality;
     if (q === 'png') return ['image/png', undefined, 'png'];
@@ -58,14 +108,28 @@
     return [t === 'jpeg' ? 'image/jpeg' : 'image/webp', +v / 100, t === 'jpeg' ? 'jpg' : 'webp'];
   }
 
-  function tw() { return SIZES[S.type][0]; }   // target width
-  function th() { return SIZES[S.type][1]; }   // target height
+  /**
+   * Целевая ширина холста (px).
+   * @returns {number}
+   */
+  function tw() { return SIZES[S.type][0]; }
+
+  /**
+   * Целевая высота холста (px).
+   * @returns {number}
+   */
+  function th() { return SIZES[S.type][1]; }
 
   // ═════════════════════════════════════
-  // Init
+  // Инициализация приложения
   // ═════════════════════════════════════
+
+  /**
+   * Главная функция инициализации — привязывает все обработчики событий,
+   * определяет тип устройства и устанавливает режим по умолчанию.
+   */
   function init() {
-    // Dropzone
+    // --- Дропзона (загрузка файлов) ---
     const dz = dom.dropzone;
     dz.addEventListener('click', () => dom.fileInput.click());
     dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
@@ -73,13 +137,14 @@
     dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); e.dataTransfer.files[0] && loadFile(e.dataTransfer.files[0]); });
     dom.fileInput.addEventListener('change', e => e.target.files[0] && loadFile(e.target.files[0]));
 
-    // Mode
+    // --- Переключение режима ---
     dom.modeApi.addEventListener('click', () => setMode('api'));
     dom.modeDraw.addEventListener('click', () => setMode('draw'));
 
-    // Settings
+    // --- Настройки ---
     dom.canvasType.addEventListener('change', () => { S.type = dom.canvasType.value; resetCrop(); render(); });
     dom.imageQuality.addEventListener('change', () => { S.quality = dom.imageQuality.value; renderResult(); });
+
     let _colorDebounce = 0;
     dom.colorCount.addEventListener('input', () => {
       S.colors = +dom.colorCount.value;
@@ -90,23 +155,23 @@
     dom.brushSize.addEventListener('change', () => S.brush = +dom.brushSize.value);
     dom.drawSpeed.addEventListener('change', () => S.speed = +dom.drawSpeed.value);
 
-    // Zoom
+    // --- Зум ---
     dom.zoomIn.addEventListener('click', () => { setZoom(S.zoom * (1 + ZOOM_STEP)); });
     dom.zoomOut.addEventListener('click', () => { setZoom(S.zoom / (1 + ZOOM_STEP)); });
     dom.zoomReset.addEventListener('click', () => { S.zoom = 1; S.panX = 0; S.panY = 0; renderCrop(); });
 
-    // Generate
+    // --- Генерация и копирование ---
     dom.generateBtn.addEventListener('click', generate);
     dom.copyBtn.addEventListener('click', copyScript);
     dom.copyBookmarklet.addEventListener('click', copyBookmarkletCode);
 
-    // Crop pan/zoom interactions
+    // --- Crop-взаимодействия (перетаскивание, пинч, скролл) ---
     initCropInteractions();
 
-    // Generate bookmarklet href
+    // --- Букмарклет ---
     updateBookmarklet();
 
-    // Auto-detect device type by screen size
+    // --- Автоопределение устройства ---
     const isMobile = window.innerWidth <= 768 || ('ontouchstart' in window && window.innerWidth < 1024);
     if (isMobile) {
       S.type = 'post';
@@ -115,7 +180,7 @@
       dom.imageQuality.value = 'jpeg-70';
     }
 
-    // Show relevant instructions per device
+    // Показываем инструкцию для нужного устройства
     const desktopInstr = $('desktopInstructions');
     const mobileInstr = $('mobileSection');
     if (isMobile) {
@@ -128,15 +193,20 @@
   }
 
   // ═════════════════════════════════════
-  // Crop Interaction (mouse + touch + pinch + wheel)
+  // Crop-взаимодействия (mouse + touch + pinch + wheel)
   // ═════════════════════════════════════
+
+  /**
+   * Инициализирует все взаимодействия с crop-канвасом:
+   * перетаскивание (pointer), зум колёсиком (wheel), пинч (touch).
+   */
   function initCropInteractions() {
     const cv = dom.cropCanvas;
     let dragging = false;
     let lastX, lastY;
     let pinchDist = 0;
 
-    // Mouse
+    // --- Pointer (мышь / стилус / палец) ---
     cv.addEventListener('pointerdown', e => {
       if (e.pointerType === 'touch' && e.isPrimary === false) return;
       dragging = true;
@@ -156,14 +226,14 @@
     cv.addEventListener('pointerup', () => dragging = false);
     cv.addEventListener('pointercancel', () => dragging = false);
 
-    // Wheel zoom
+    // --- Зум колёсиком ---
     cv.addEventListener('wheel', e => {
       e.preventDefault();
       const delta = e.deltaY > 0 ? 1 / (1 + ZOOM_STEP) : (1 + ZOOM_STEP);
       setZoom(S.zoom * delta);
     }, { passive: false });
 
-    // Touch pinch
+    // --- Touch-пинч (двумя пальцами) ---
     const touches = new Map();
     cv.addEventListener('touchstart', e => {
       for (const t of e.changedTouches) touches.set(t.identifier, { x: t.clientX, y: t.clientY });
@@ -189,19 +259,22 @@
       if (touches.size < 2) pinchDist = 0;
     });
 
-    // Fade hint
+    // Скрываем подсказку при первом взаимодействии
     cv.addEventListener('pointerdown', () => {
       dom.cropHint.classList.add('fade');
     }, { once: true });
   }
 
+  /**
+   * Панорамирование (сдвиг видимой области) при перетаскивании.
+   * Преобразует экранные пиксели в координаты изображения и обновляет состояние.
+   * @param {number} dxPx — смещение по X в экранных пикселях
+   * @param {number} dyPx — смещение по Y в экранных пикселях
+   */
   function pan(dxPx, dyPx) {
     const cv = dom.cropCanvas;
     const rect = cv.getBoundingClientRect();
-    // The image is drawn at a size based on zoom; convert px to logical
-    const img = S.img;
     const scaleToCanvas = rect.width / tw();
-    // How many image px we moved
     const imgScale = coverScale() * S.zoom;
     const dxImg = dxPx / (imgScale * scaleToCanvas);
     const dyImg = dyPx / (imgScale * scaleToCanvas);
@@ -211,11 +284,20 @@
     renderCrop();
   }
 
+  /**
+   * Вычисляет масштаб cover-заполнения (как CSS background-size: cover).
+   * Возвращает коэффициент, при котором изображение полностью покрывает целевую область.
+   * @returns {number}
+   */
   function coverScale() {
     if (!S.img) return 1;
     return Math.max(tw() / S.img.width, th() / S.img.height);
   }
 
+  /**
+   * Максимально допустимый сдвиг по X (в пикселях изображения).
+   * @returns {number}
+   */
   function maxPanX() {
     if (!S.img) return 0;
     const s = coverScale() * S.zoom;
@@ -223,6 +305,10 @@
     return Math.max(0, (S.img.width - visW) / 2);
   }
 
+  /**
+   * Максимально допустимый сдвиг по Y (в пикселях изображения).
+   * @returns {number}
+   */
   function maxPanY() {
     if (!S.img) return 0;
     const s = coverScale() * S.zoom;
@@ -230,20 +316,37 @@
     return Math.max(0, (S.img.height - visH) / 2);
   }
 
+  /**
+   * Устанавливает новый уровень зума с ограничением [MIN_ZOOM, MAX_ZOOM]
+   * и перекламливает pan в допустимый диапазон.
+   * @param {number} z — новый уровень зума
+   */
   function setZoom(z) {
     S.zoom = clamp(z, MIN_ZOOM, MAX_ZOOM);
-    // Re-clamp pan
     S.panX = clamp(S.panX, -maxPanX(), maxPanX());
     S.panY = clamp(S.panY, -maxPanY(), maxPanY());
     dom.zoomInfo.textContent = Math.round(S.zoom * 100) + '%';
     renderCrop();
   }
 
+  /**
+   * Ограничивает значение в диапазоне [min, max].
+   * @param {number} v   — значение
+   * @param {number} min — нижняя граница
+   * @param {number} max — верхняя граница
+   * @returns {number}
+   */
   function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
   // ═════════════════════════════════════
-  // Load file
+  // Загрузка файла
   // ═════════════════════════════════════
+
+  /**
+   * Загружает файл изображения, декодирует через FileReader → Image,
+   * сохраняет в состояние и запускает рендер.
+   * @param {File} file — файл из input или drop
+   */
   function loadFile(file) {
     if (!file.type.startsWith('image/')) return toast('Не изображение', 'error');
     const reader = new FileReader();
@@ -261,14 +364,22 @@
     reader.readAsDataURL(file);
   }
 
+  /**
+   * Сбрасывает состояние обрезки к начальным значениям (зум 100%, центр).
+   */
   function resetCrop() {
     S.zoom = 1; S.panX = 0; S.panY = 0;
     dom.zoomInfo.textContent = '100%';
   }
 
   // ═════════════════════════════════════
-  // Render pipeline
+  // Рендер-пайплайн
   // ═════════════════════════════════════
+
+  /**
+   * Основная функция рендера — показывает crop-редактор и запускает
+   * отрисовку crop-канваса + превью результата.
+   */
   function render() {
     if (!S.img) return;
     dom.cropEditor.classList.remove('hidden');
@@ -278,13 +389,21 @@
     renderResult();
   }
 
-  // Render crop canvas (show user what will be cropped)
+  /**
+   * Запланировать отрисовку crop-канваса через requestAnimationFrame
+   * (объединяет несколько вызовов в один кадр).
+   */
   let _rafCrop = 0;
   function renderCrop() {
     cancelAnimationFrame(_rafCrop);
     _rafCrop = requestAnimationFrame(_renderCrop);
   }
 
+  /**
+   * Непосредственная отрисовка crop-канваса:
+   * рисует изображение с учётом зума/панорамирования и накладывает сетку третей.
+   * @private
+   */
   function _renderCrop() {
     const img = S.img;
     if (!img) return;
@@ -293,7 +412,7 @@
     const cv = dom.cropCanvas;
     const dpr = window.devicePixelRatio || 1;
 
-    // Canvas CSS size = full width of container, height proportional
+    // Размер канваса подгоняется под контейнер с учётом DevicePixelRatio
     const containerW = cv.parentElement.clientWidth;
     const displayH = (H / W) * containerW;
     cv.style.height = displayH + 'px';
@@ -303,21 +422,20 @@
     const ctx = cv.getContext('2d');
     ctx.scale(dpr, dpr);
 
-    // Background
+    // Фон
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, containerW, displayH);
 
-    // Compute source rect from image
+    // Координаты исходного фрагмента с учётом зума и панорамирования
     const s = coverScale() * S.zoom;
     const srcW = W / s;
     const srcH = H / s;
     const srcX = (img.width - srcW) / 2 - S.panX;
     const srcY = (img.height - srcH) / 2 - S.panY;
 
-    // Draw image scaled to canvas display area
     ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, containerW, displayH);
 
-    // Grid overlay (thirds)
+    // Сетка третей (полупрозрачные линии)
     ctx.strokeStyle = 'rgba(255,255,255,0.15)';
     ctx.lineWidth = 1;
     for (let i = 1; i < 3; i++) {
@@ -329,21 +447,27 @@
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-    // Debounced result update — don't run quantization on every drag frame
+    // Отложенное обновление результата (не запускаем квантизацию при каждом кадре)
     _debouncedResult();
   }
 
-  // Debounce heavy result render (quantization ~50ms) — only after user stops dragging
+  /**
+   * Дебаунс тяжёлого рендера результата (квантизация ~50 мс).
+   * Сначала показывает быстрое превью, затем через 300 мс запускает полный рендер.
+   * @private
+   */
   let _debounceTimer = 0;
   function _debouncedResult() {
     clearTimeout(_debounceTimer);
-    // Quick preview: just update the result canvas without quantization
     _quickResultPreview();
-    // Full render after 300ms idle
     _debounceTimer = setTimeout(() => _renderResult(), 300);
   }
 
-  // Fast preview — just draw cropped image to result canvas (no quantization)
+  /**
+   * Быстрое превью — рисует обрезанное изображение в результирующий канвас
+   * без квантизации (мгновенная обратная связь при перетаскивании).
+   * @private
+   */
   function _quickResultPreview() {
     const img = S.img;
     if (!img) return;
@@ -356,7 +480,11 @@
     dom.previewSection.classList.remove('hidden');
   }
 
-  // Get the cropped portion — use OffscreenCanvas (GPU) if available
+  /**
+   * Возвращает канвас/OffscreenCanvas с обрезанным фрагментом изображения
+   * в целевом разрешении (tw × th). Использует OffscreenCanvas если доступен.
+   * @returns {HTMLCanvasElement|OffscreenCanvas|null}
+   */
   function getCroppedCanvas() {
     const img = S.img;
     if (!img) return null;
@@ -379,13 +507,21 @@
     return cv;
   }
 
-  // Render result canvas
+  /**
+   * Запланировать полный рендер результата через requestAnimationFrame.
+   */
   let _rafResult = 0;
   function renderResult() {
     cancelAnimationFrame(_rafResult);
     _rafResult = requestAnimationFrame(_renderResult);
   }
 
+  /**
+   * Полный рендер результата: рисует обрезанное изображение,
+   * в режиме «Рисование» выполняет квантизацию и показывает палитру.
+   * Обновляет статистику (размер файла, кол-во цветов).
+   * @private
+   */
   function _renderResult() {
     const img = S.img;
     if (!img) return;
@@ -396,12 +532,12 @@
     const W = tw(), H = th();
     const [mime, qual] = fmt();
 
-    // Show result
+    // Основной результат
     const rc = dom.resultCanvas;
     rc.width = W; rc.height = H;
     rc.getContext('2d').drawImage(cropped, 0, 0);
 
-    // Quantized preview (draw mode)
+    // Квантизация (режим «Рисование»)
     const qBox = dom.quantizedBox || dom.resultLabel?.parentElement;
     if (S.mode === 'draw') {
       const pixels = cropped.getContext('2d').getImageData(0, 0, W, H).data;
@@ -433,7 +569,7 @@
       S.quantized = null;
     }
 
-    // Size
+    // Размер файла
     const dataUrl = rc.toDataURL(mime, qual);
     const kb = ((dataUrl.length - 22) * 0.75 / 1024) | 0;
     dom.statSize.textContent = kb > 1024 ? (kb / 1024).toFixed(1) + ' MB' : kb + ' KB';
@@ -444,30 +580,41 @@
   }
 
   // ═════════════════════════════════════
-  // Fast Median-Cut Quantization + Color Cache
+  // Median-Cut квантизация цветов
   // ═════════════════════════════════════
+
+  /**
+   * Уменьшает количество цветов в изображении методом Median-Cut.
+   * Дедуплицирует цвета, рекурсивно делит на бакеты, вычисляет палитру
+   * как взвешенное среднее каждого бакета.
+   *
+   * @param {Uint8ClampedArray} pixels    — RGBA-пиксели (ImageData.data)
+   * @param {number}            maxColors — максимальное количество цветов в палитре
+   * @returns {{ palette: Array<[number,number,number]>, indexed: Uint16Array }}
+   *   palette — массив RGB-цветов палитры,
+   *   indexed — индекс ближайшего цвета палитры для каждого пикселя
+   */
   function octreeQuantize(pixels, maxColors) {
     const N = pixels.length >> 2;
 
-    // 1. Deduplicate colors via Map → typically ~50K unique from 400K+ pixels
+    // 1. Дедупликация: собираем уникальные цвета и их частоту
     const colorMap = new Map();
     for (let i = 0; i < N; i++) {
       const key = (pixels[i * 4] << 16) | (pixels[i * 4 + 1] << 8) | pixels[i * 4 + 2];
       colorMap.set(key, (colorMap.get(key) || 0) + 1);
     }
 
-    // Convert to array of {r,g,b,count}
+    // Конвертируем в массив {r, g, b, count}
     const colors = new Array(colorMap.size);
     let ci = 0;
     colorMap.forEach((count, key) => {
       colors[ci++] = { r: (key >> 16) & 0xFF, g: (key >> 8) & 0xFF, b: key & 0xFF, count };
     });
 
-    // 2. Median-cut: split buckets on channel with max weighted range
+    // 2. Median-Cut: делим бакеты по каналу с наибольшим взвешенным диапазоном
     let buckets = [colors];
 
     while (buckets.length < maxColors) {
-      // Find bucket with largest range (weighted by pixel count)
       let bestIdx = -1, bestRange = -1;
       for (let i = 0; i < buckets.length; i++) {
         if (buckets[i].length <= 1) continue;
@@ -479,7 +626,7 @@
       const bucket = buckets[bestIdx];
       const { channel } = _bucketRange(bucket);
 
-      // Sort by channel and split at median (by pixel count)
+      // Сортировка по каналу и разделение в медиане (по кол-ву пикселей)
       bucket.sort((a, b) => a[channel] - b[channel]);
       let half = 0, total = 0;
       for (const c of bucket) total += c.count;
@@ -494,7 +641,7 @@
       buckets.splice(bestIdx, 1, bucket.slice(0, mid), bucket.slice(mid));
     }
 
-    // 3. Extract palette (weighted average per bucket)
+    // 3. Палитра — взвешенное среднее RGB каждого бакета
     const palette = new Array(buckets.length);
     for (let i = 0; i < buckets.length; i++) {
       let tR = 0, tG = 0, tB = 0, tC = 0;
@@ -504,7 +651,7 @@
       palette[i] = [(tR / tC + .5) | 0, (tG / tC + .5) | 0, (tB / tC + .5) | 0];
     }
 
-    // 4. Map pixels using color cache (each unique color looked up once)
+    // 4. Маппинг пикселей на ближайший цвет палитры (с кэшем)
     const cache = new Map();
     const indexed = new Uint16Array(N);
 
@@ -521,6 +668,12 @@
     return { palette, indexed };
   }
 
+  /**
+   * Определяет канал (r/g/b) с наибольшим диапазоном значений внутри бакета.
+   * @param {Array<{r:number, g:number, b:number, count:number}>} bucket
+   * @returns {{ channel: string, maxRange: number }}
+   * @private
+   */
   function _bucketRange(bucket) {
     let minR = 255, maxR = 0, minG = 255, maxG = 0, minB = 255, maxB = 0;
     for (const c of bucket) {
@@ -534,6 +687,15 @@
     return { channel: 'b', maxRange: bR };
   }
 
+  /**
+   * Находит индекс ближайшего цвета в палитре (евклидово расстояние в RGB).
+   * @param {number} r — красный (0–255)
+   * @param {number} g — зелёный (0–255)
+   * @param {number} b — синий (0–255)
+   * @param {Array<[number,number,number]>} palette — палитра цветов
+   * @returns {number} — индекс ближайшего цвета
+   * @private
+   */
   function _closest(r, g, b, palette) {
     let minD = Infinity, idx = 0;
     for (let i = 0; i < palette.length; i++) {
@@ -545,8 +707,15 @@
   }
 
   // ═════════════════════════════════════
-  // Mode
+  // Переключение режимов
   // ═════════════════════════════════════
+
+  /**
+   * Переключает режим работы приложения (API / Рисование).
+   * Обновляет UI-переключатель, показывает/скрывает настройки,
+   * и перерисовывает результат.
+   * @param {'api'|'draw'} mode — новый режим
+   */
   function setMode(mode) {
     S.mode = mode;
     dom.modeApi.classList.toggle('active', mode === 'api');
@@ -562,13 +731,24 @@
   }
 
   // ═════════════════════════════════════
-  // Helpers
+  // Утилиты
   // ═════════════════════════════════════
+
+  /**
+   * Преобразует RGB-массив в HEX-строку (#RRGGBB).
+   * @param {[number, number, number]} c — цвет [R, G, B]
+   * @returns {string} — HEX-представление, например '#FF00AA'
+   */
   function hex(c) { return '#' + ((1 << 24) + (c[0] << 16) + (c[1] << 8) + c[2]).toString(16).slice(1).toUpperCase(); }
 
   // ═════════════════════════════════════
-  // Generate
+  // Генерация скриптов
   // ═════════════════════════════════════
+
+  /**
+   * Обработчик кнопки «Сгенерировать скрипт».
+   * Вызывает нужный генератор (API / Draw), выводит результат и уведомляет пользователя.
+   */
   function generate() {
     if (!S.img) return;
     dom.generateBtn.disabled = true;
@@ -587,42 +767,48 @@
     });
   }
 
-  // ── API Script ──
+  /**
+   * Генерирует скрипт для режима API:
+   * конвертирует обрезанное изображение в base64, формирует JS-код,
+   * который загружает файл через API платформы и устанавливает баннер.
+   * @returns {string} — JavaScript-код для вставки в консоль
+   */
   function genApi() {
     const [mime,, ext] = fmt();
-    // Use resultCanvas (DOM canvas) which always has toDataURL
     const dataUrl = dom.resultCanvas.toDataURL(mime, fmt()[1]);
     const b64 = dataUrl.split(',')[1];
     return `(async()=>{try{
 const b=atob("${b64}"),a=new Uint8Array(b.length);
 for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);
 const f=new File([new Blob([a],{type:'${mime}'})], 'b.${ext}',{type:'${mime}'});
-console.log('📤 '+Math.round(f.size/1024)+'KB');
 let d=localStorage.getItem('device-id');
 if(!d){for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.includes('device')){d=localStorage.getItem(k);break}}}
 if(!d)d=crypto.randomUUID();
 const h={'X-Device-Id':d,'X-Requested-With':'XMLHttpRequest'};
 const r=await fetch('/api/v1/auth/refresh',{method:'POST',headers:{...h,'Content-Type':'application/json'},credentials:'include'});
-if(!r.ok)throw Error('Войдите! '+r.status);
+if(!r.ok)throw Error('Необходимо войти в аккаунт ('+r.status+')');
 const tk=(await r.json()).accessToken;
 const fd=new FormData();fd.append('file',f);
 const u=await fetch('/api/files/upload',{method:'POST',headers:{'Authorization':'Bearer '+tk,...h},body:fd,credentials:'include'});
-if(!u.ok)throw Error('Upload: '+u.status);
-const ud=await u.json();console.log('✅',ud);
+if(!u.ok)throw Error('Ошибка загрузки: '+u.status);
+const ud=await u.json();
 await fetch('/api/users/me',{method:'PUT',headers:{'Authorization':'Bearer '+tk,'Content-Type':'application/json',...h},body:JSON.stringify({bannerId:ud.id}),credentials:'include'});
-console.log('🎉 Готово! F5');
-}catch(e){console.error('❌',e.message)}})();`;
+console.log('Готово');
+}catch(e){console.error('Ошибка: '+e.message)}})();`;
   }
 
-  // ── Draw Script ──
-  // Загружает квантизованное изображение (с уменьшенной палитрой) через API
-  // Рисовать на canvas сайта бесполезно — React-компонент стирает при re-render
+  /**
+   * Генерирует скрипт для режима «Рисование»:
+   * берёт квантизованное изображение, конвертирует в PNG base64,
+   * формирует JS-код для загрузки через API.
+   * @returns {string} — JavaScript-код для вставки в консоль
+   */
   function genDraw() {
     if (!S.quantized) _renderResult();
     if (!S.quantized) return '// Ошибка: нет данных квантизации';
     const { palette, indexed, W, H } = S.quantized;
 
-    // Render quantized image to canvas → base64
+    // Рендерим квантизованное изображение в PNG base64
     const tmpCv = document.createElement('canvas');
     tmpCv.width = W; tmpCv.height = H;
     const tmpCtx = tmpCv.getContext('2d');
@@ -636,39 +822,44 @@ console.log('🎉 Готово! F5');
     tmpCtx.putImageData(tmpData, 0, 0);
     const b64 = tmpCv.toDataURL('image/png').split(',')[1];
 
-    return `// ITD — Загрузка квантизованного изображения (${palette.length} цветов)
-(async()=>{try{
+    return `(async()=>{try{
 const b=atob("${b64}"),a=new Uint8Array(b.length);
 for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);
 const f=new File([new Blob([a],{type:'image/png'})], 'draw.png',{type:'image/png'});
-console.log('📤 Загрузка ('+Math.round(f.size/1024)+' KB, ${palette.length} цветов)...');
 let d=localStorage.getItem('device-id');
 if(!d){for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.includes('device')){d=localStorage.getItem(k);break}}}
 if(!d)d=crypto.randomUUID();
 const h={'X-Device-Id':d,'X-Requested-With':'XMLHttpRequest'};
 const r=await fetch('/api/v1/auth/refresh',{method:'POST',headers:{...h,'Content-Type':'application/json'},credentials:'include'});
-if(!r.ok)throw Error('Войдите в аккаунт! '+r.status);
+if(!r.ok)throw Error('Необходимо войти в аккаунт ('+r.status+')');
 const tk=(await r.json()).accessToken;
 const fd=new FormData();fd.append('file',f);
 const u=await fetch('/api/files/upload',{method:'POST',headers:{'Authorization':'Bearer '+tk,...h},body:fd,credentials:'include'});
-if(!u.ok)throw Error('Upload: '+u.status);
-const ud=await u.json();console.log('✅ Файл загружен:',ud);
+if(!u.ok)throw Error('Ошибка загрузки: '+u.status);
+const ud=await u.json();
 await fetch('/api/users/me',{method:'PUT',headers:{'Authorization':'Bearer '+tk,'Content-Type':'application/json',...h},body:JSON.stringify({bannerId:ud.id}),credentials:'include'});
-console.log('🎉 Баннер установлен! F5');
-}catch(e){console.error('❌',e.message)}})();`;
+console.log('Готово');
+}catch(e){console.error('Ошибка: '+e.message)}})();`;
   }
 
   // ═════════════════════════════════════
-  // Bookmarklet
+  // Букмарклет (мобильная загрузка)
   // ═════════════════════════════════════
+
+  /**
+   * Генерирует JavaScript-букмарклет — самодостаточный скрипт,
+   * который открывает файл-пикер на сайте ИТД, обрезает изображение,
+   * загружает и устанавливает баннер.
+   */
   function updateBookmarklet() {
-    // Self-contained bookmarklet: creates file picker on ITD site,
-    // resizes image, uploads, sets banner
-    const code = `javascript:void((async()=>{const W=${tw()},H=${th()};const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=async()=>{const f=i.files[0];if(!f)return;const img=new Image();img.src=URL.createObjectURL(f);await new Promise(r=>img.onload=r);const cv=Object.assign(document.createElement('canvas'),{width:W,height:H});const ctx=cv.getContext('2d');const s=Math.max(W/img.width,H/img.height);const sw=W/s,sh=H/s;ctx.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,0,0,W,H);cv.toBlob(async b=>{try{let d=localStorage.getItem('device-id')||crypto.randomUUID();const h={'X-Device-Id':d,'X-Requested-With':'XMLHttpRequest'};const r=await fetch('/api/v1/auth/refresh',{method:'POST',headers:{...h,'Content-Type':'application/json'},credentials:'include'});if(!r.ok)return alert('Войдите в аккаунт!');const tk=(await r.json()).accessToken;const fd=new FormData();fd.append('file',new File([b],'b.jpg',{type:'image/jpeg'}));const u=await fetch('/api/files/upload',{method:'POST',headers:{'Authorization':'Bearer '+tk,...h},body:fd,credentials:'include'});const ud=await u.json();await fetch('/api/users/me',{method:'PUT',headers:{'Authorization':'Bearer '+tk,'Content-Type':'application/json',...h},body:JSON.stringify({bannerId:ud.id}),credentials:'include'});alert('✅ Баннер установлен! Обновите страницу.')}catch(e){alert('❌ '+e.message)}},'image/jpeg',0.85)};i.click()})())`;
+    const code = `javascript:void((async()=>{const W=${tw()},H=${th()};const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=async()=>{const f=i.files[0];if(!f)return;const img=new Image();img.src=URL.createObjectURL(f);await new Promise(r=>img.onload=r);const cv=Object.assign(document.createElement('canvas'),{width:W,height:H});const ctx=cv.getContext('2d');const s=Math.max(W/img.width,H/img.height);const sw=W/s,sh=H/s;ctx.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,0,0,W,H);cv.toBlob(async b=>{try{let d=localStorage.getItem('device-id')||crypto.randomUUID();const h={'X-Device-Id':d,'X-Requested-With':'XMLHttpRequest'};const r=await fetch('/api/v1/auth/refresh',{method:'POST',headers:{...h,'Content-Type':'application/json'},credentials:'include'});if(!r.ok)return alert('Необходимо войти в аккаунт');const tk=(await r.json()).accessToken;const fd=new FormData();fd.append('file',new File([b],'b.jpg',{type:'image/jpeg'}));const u=await fetch('/api/files/upload',{method:'POST',headers:{'Authorization':'Bearer '+tk,...h},body:fd,credentials:'include'});const ud=await u.json();await fetch('/api/users/me',{method:'PUT',headers:{'Authorization':'Bearer '+tk,'Content-Type':'application/json',...h},body:JSON.stringify({bannerId:ud.id}),credentials:'include'});alert('Готово! Обновите страницу.')}catch(e){alert('Ошибка: '+e.message)}},'image/jpeg',0.85)};i.click()})())`;
 
     dom.bookmarkletLink.href = code;
   }
 
+  /**
+   * Копирует код букмарклета в буфер обмена и показывает подтверждение.
+   */
   function copyBookmarkletCode() {
     navigator.clipboard.writeText(dom.bookmarkletLink.href).then(() => {
       dom.copyBookmarklet.textContent = '✅ Скопировано';
@@ -677,8 +868,12 @@ console.log('🎉 Баннер установлен! F5');
   }
 
   // ═════════════════════════════════════
-  // Copy & Toast
+  // Копирование и уведомления
   // ═════════════════════════════════════
+
+  /**
+   * Копирует сгенерированный скрипт в буфер обмена.
+   */
   function copyScript() {
     if (!S.script) return;
     navigator.clipboard.writeText(S.script).then(() => {
@@ -688,6 +883,11 @@ console.log('🎉 Баннер установлен! F5');
     });
   }
 
+  /**
+   * Показывает всплывающее уведомление (toast) в нижней части экрана.
+   * @param {string} msg  — текст сообщения
+   * @param {'success'|'error'} [type='success'] — тип уведомления
+   */
   function toast(msg, type = 'success') {
     const t = document.createElement('div');
     t.className = `toast ${type}`;

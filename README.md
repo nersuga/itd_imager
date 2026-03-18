@@ -21,7 +21,7 @@
 
 1. **Клонируйте репозиторий:**
    ```bash
-   git clone https://github.com/<ваш-username>/itd_imager.git
+   git clone https://github.com/nersuga/itd_imager.git
    cd itd_imager
    ```
 
