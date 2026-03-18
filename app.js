@@ -182,11 +182,13 @@
 
     // Показываем инструкцию для нужного устройства
     const desktopInstr = $('desktopInstructions');
-    const mobileInstr = $('mobileSection');
+    const mobileInstr = $('mobileInstructions');
+    const bookmarkletInstr = $('mobileSection');
     if (isMobile) {
       if (desktopInstr) desktopInstr.classList.add('hidden');
     } else {
       if (mobileInstr) mobileInstr.classList.add('hidden');
+      if (bookmarkletInstr) bookmarkletInstr.classList.add('hidden');
     }
 
     setMode('api');

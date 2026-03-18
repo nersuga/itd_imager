@@ -157,22 +157,49 @@
         <h4>💻 Десктоп</h4>
         <ol>
           <li>Откройте <code>итд.com</code> и залогиньтесь</li>
-          <li><code>F12</code> → Console → вставьте скрипт</li>
+          <li>Нажмите <code>F12</code> → вкладка <strong>Console</strong></li>
+          <li>Вставьте скрипт (<code>Ctrl+V</code>) и нажмите <code>Enter</code></li>
         </ol>
+        <div class="instructions-note">
+          ⚠️ Если браузер пишет <code>allow pasting</code> — введите это в консоль и нажмите Enter, затем вставьте скрипт снова.
+        </div>
+      </div>
+
+      <div class="instructions" id="mobileInstructions">
+        <h4>📱 Мобильная версия</h4>
+        <p class="instructions-subtitle">Нужен браузер с консолью разработчика:</p>
+        <div class="mobile-option">
+          <strong>Kiwi Browser</strong> <span class="mobile-tag">рекомендуем</span>
+          <ol>
+            <li>Установите <a href="https://play.google.com/store/apps/details?id=com.nicergv.nicekiwibrowser" target="_blank" rel="noopener">Kiwi Browser</a></li>
+            <li>Откройте <code>итд.com</code> и залогиньтесь</li>
+            <li>Меню <strong>⋮</strong> → <strong>Developer tools</strong> → <strong>Console</strong></li>
+            <li>Вставьте скрипт и нажмите Enter</li>
+          </ol>
+        </div>
+        <div class="mobile-option">
+          <strong>Яндекс Браузер</strong>
+          <ol>
+            <li>Откройте <code>итд.com</code> и залогиньтесь</li>
+            <li>В адресной строке введите <code>browser://inspect</code></li>
+            <li>Найдите вкладку с сайтом → <strong>inspect</strong> → <strong>Console</strong></li>
+            <li>Вставьте скрипт и нажмите Enter</li>
+          </ol>
+        </div>
       </div>
 
       <div class="bookmarklet-section" id="mobileSection">
         <div class="bookmarklet-box">
-          <h4 style="font-size:14px;font-weight:600">📱 Мобильная версия</h4>
+          <h4 style="font-size:14px;font-weight:600">🔖 Букмарклет <span style="font-weight:400;font-size:12px;color:var(--text-tertiary)">(альтернатива)</span></h4>
           <div class="bookmarklet-steps">
             <ol>
-              <li>Нажмите кнопку ниже → <strong>Добавьте в закладки</strong></li>
+              <li>Нажмите кнопку ниже → <strong>добавьте в закладки</strong></li>
               <li>Откройте <strong>итд.com</strong> и залогиньтесь</li>
               <li>Откройте закладку → выберите фото → готово!</li>
             </ol>
           </div>
           <a class="bookmarklet-link" id="bookmarkletLink" href="#">
-            📱 Установить букмарклет
+            🔖 Установить букмарклет
           </a>
           <button class="btn btn-sm" id="copyBookmarklet" style="align-self:center;width:auto;background:var(--bg-tertiary);color:var(--text-primary)">
             📋 Скопировать букмарклет

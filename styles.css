@@ -81,7 +81,10 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
 .app-name {
   font-family: 'Unbounded', Inter, sans-serif;
   font-size: 18px; font-weight: 700;
+  display: flex; align-items: center; gap: 6px;
 }
+
+.app-name svg { margin-bottom: -4px; }
 
 .app-desc { font-size: 13px; color: var(--text-secondary); }
 
@@ -359,6 +362,49 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
 .instructions code {
   background: var(--bg-tertiary); padding: 1px 4px; border-radius: 4px;
   font-family: 'SF Mono', Consolas, monospace; font-size: .9em; color: var(--accent-primary);
+}
+.instructions a {
+  color: var(--accent-primary); text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.instructions a:hover { color: var(--accent-hover); }
+
+.instructions-note {
+  margin-top: 10px; padding: 10px 12px;
+  background: rgba(255, 180, 0, .08);
+  border: 1px solid rgba(255, 180, 0, .2);
+  border-radius: 10px;
+  font-size: 12px; color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.instructions-subtitle {
+  font-size: 13px; color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.mobile-option {
+  padding: 12px;
+  background: var(--bg-tertiary);
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.mobile-option:last-child { margin-bottom: 0; }
+.mobile-option strong { font-size: 13px; }
+.mobile-option ol { padding-left: 18px; margin-top: 6px; font-size: 12px; color: var(--text-secondary); }
+.mobile-option li { margin-bottom: 3px; }
+
+.mobile-tag {
+  display: inline-block;
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(34, 197, 94, .15);
+  color: #22c55e;
+  vertical-align: middle;
+  margin-left: 4px;
 }
 
 .script-output { position: relative; margin-top: 12px; }
