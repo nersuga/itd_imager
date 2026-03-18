@@ -172,7 +172,7 @@
         <div class="mobile-option">
           <strong>Шаг 1.</strong> Скопируйте мини-скрипт:
           <div class="inject-script-box">
-            <code id="injectScript">fetch('https://nersuga.github.io/itd_imager/m.js').then(r=>r.text()).then(eval)</code>
+            <code id="injectScript">fetch('https://nersuga.github.io/itd_imager/m.js').then(r=>r.text()).then(t=>{const s=document.createElement('script');s.textContent=t;document.head.appendChild(s)})</code>
             <button class="inject-copy-btn" id="copyInject">📋</button>
           </div>
         </div>

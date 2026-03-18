@@ -6,7 +6,7 @@
  * прямо с мобильного устройства без DevTools.
  *
  * Использование:
- *   fetch('https://nersuga.github.io/itd_imager/m.js').then(r=>r.text()).then(eval)
+ *   fetch('https://nersuga.github.io/itd_imager/m.js').then(r=>r.text()).then(t=>{const s=document.createElement('script');s.textContent=t;document.head.appendChild(s)})
  *
  * @file m.js
  * @author nersuga
