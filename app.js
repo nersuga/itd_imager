@@ -89,7 +89,7 @@
     'brushSize','drawSpeed',
     'colorsSetting','brushSizeSetting','speedSetting',
     'generateBtn','scriptOutput','scriptPre','copyBtn',
-    'bookmarkletLink','copyBookmarklet','toastContainer',
+    'toastContainer',
   ];
   IDS.forEach(id => dom[id] = $(id));
 
@@ -163,13 +163,10 @@
     // --- Генерация и копирование ---
     dom.generateBtn.addEventListener('click', generate);
     dom.copyBtn.addEventListener('click', copyScript);
-    dom.copyBookmarklet.addEventListener('click', copyBookmarkletCode);
 
     // --- Crop-взаимодействия (перетаскивание, пинч, скролл) ---
     initCropInteractions();
 
-    // --- Букмарклет ---
-    updateBookmarklet();
 
     // --- Автоопределение устройства ---
     const isMobile = window.innerWidth <= 768 || ('ontouchstart' in window && window.innerWidth < 1024);
@@ -183,12 +180,10 @@
     // Показываем инструкцию для нужного устройства
     const desktopInstr = $('desktopInstructions');
     const mobileInstr = $('mobileInstructions');
-    const bookmarkletInstr = $('mobileSection');
     if (isMobile) {
       if (desktopInstr) desktopInstr.classList.add('hidden');
     } else {
       if (mobileInstr) mobileInstr.classList.add('hidden');
-      if (bookmarkletInstr) bookmarkletInstr.classList.add('hidden');
     }
 
     setMode('api');
@@ -844,30 +839,7 @@ console.log('Готово');
 }catch(e){console.error('Ошибка: '+e.message)}})();`;
   }
 
-  // ═════════════════════════════════════
-  // Букмарклет (мобильная загрузка)
-  // ═════════════════════════════════════
 
-  /**
-   * Генерирует JavaScript-букмарклет — самодостаточный скрипт,
-   * который открывает файл-пикер на сайте ИТД, обрезает изображение,
-   * загружает и устанавливает баннер.
-   */
-  function updateBookmarklet() {
-    const code = `javascript:void((async()=>{const W=${tw()},H=${th()};const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=async()=>{const f=i.files[0];if(!f)return;const img=new Image();img.src=URL.createObjectURL(f);await new Promise(r=>img.onload=r);const cv=Object.assign(document.createElement('canvas'),{width:W,height:H});const ctx=cv.getContext('2d');const s=Math.max(W/img.width,H/img.height);const sw=W/s,sh=H/s;ctx.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,0,0,W,H);cv.toBlob(async b=>{try{let d=localStorage.getItem('device-id')||crypto.randomUUID();const h={'X-Device-Id':d,'X-Requested-With':'XMLHttpRequest'};const r=await fetch('/api/v1/auth/refresh',{method:'POST',headers:{...h,'Content-Type':'application/json'},credentials:'include'});if(!r.ok)return alert('Необходимо войти в аккаунт');const tk=(await r.json()).accessToken;const fd=new FormData();fd.append('file',new File([b],'b.jpg',{type:'image/jpeg'}));const u=await fetch('/api/files/upload',{method:'POST',headers:{'Authorization':'Bearer '+tk,...h},body:fd,credentials:'include'});const ud=await u.json();await fetch('/api/users/me',{method:'PUT',headers:{'Authorization':'Bearer '+tk,'Content-Type':'application/json',...h},body:JSON.stringify({bannerId:ud.id}),credentials:'include'});alert('Готово! Обновите страницу.')}catch(e){alert('Ошибка: '+e.message)}},'image/jpeg',0.85)};i.click()})())`;
-
-    dom.bookmarkletLink.href = code;
-  }
-
-  /**
-   * Копирует код букмарклета в буфер обмена и показывает подтверждение.
-   */
-  function copyBookmarkletCode() {
-    navigator.clipboard.writeText(dom.bookmarkletLink.href).then(() => {
-      dom.copyBookmarklet.textContent = '✅ Скопировано';
-      setTimeout(() => dom.copyBookmarklet.textContent = '📋 Скопировать букмарклет', 2000);
-    });
-  }
 
   // ═════════════════════════════════════
   // Копирование и уведомления
