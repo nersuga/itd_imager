@@ -13,7 +13,7 @@
   <div class="app-container">
 
     <header class="app-header">
-      <div class="app-logo">🎨</div>
+      <div class="app-logo"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20" fill="none"><path fill="currentColor" d="M10.004 1C14.92 1 18.976 4.61 19 8.955c0 2.747-2.255 5-5.002 5h-1.797a1.477 1.477 0 0 0-1.502 1.501c0 .426.134.753.395 1.013.231.26.393.618.393 1.011 0 .848-.65 1.52-1.483 1.52C5.052 19 1 14.95 1 10s4.052-9 9.004-9ZM5.25 9a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Zm9-2a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Zm-7-2a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Zm4-1a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Z"></path></svg></div>
       <span class="app-name"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="18" fill="none"><path fill="currentColor" d="M12 3V0h12v3h-4v11h-4V3h-4Z"></path><path fill="currentColor" d="M12 3V0h12v3h-4v11h-4V3h-4ZM9 0 3 9V0H0v14h3l6-9v9h3V0H9Z"></path><path fill="currentColor" fill-rule="evenodd" d="M34 11h2v7h-3v-4h-9v4h-3v-7c3 0 3-4 3-11h10v11Zm-7-8v8h4V3h-4Z" clip-rule="evenodd"></path></svg> Imager</span>
       <span class="app-desc">Автозагрузка изображений на ИТД</span>
     </header>
@@ -84,8 +84,8 @@
 
       <div class="mode-toggle">
         <div class="indicator left" id="modeIndicator"></div>
-        <button class="active" data-mode="api" id="modeApi">⚡ API</button>
-        <button data-mode="draw" id="modeDraw">🎨 Рисование</button>
+        <button class="active" data-mode="api" id="modeApi">API</button>
+        <button data-mode="draw" id="modeDraw">Рисование</button>
       </div>
 
       <div class="settings-grid">
@@ -154,35 +154,35 @@
       </div>
 
       <div class="instructions" id="desktopInstructions">
-        <h4>💻 Десктоп</h4>
+        <h4><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M8 21h8M12 17v4"/></svg>Десктоп</h4>
         <ol>
           <li>Откройте <code>итд.com</code> и залогиньтесь</li>
           <li>Нажмите <code>F12</code> → вкладка <strong>Console</strong></li>
           <li>Вставьте скрипт (<code>Ctrl+V</code>) и нажмите <code>Enter</code></li>
         </ol>
         <div class="instructions-note">
-          ⚠️ Если браузер пишет <code>allow pasting</code> — введите это в консоль и нажмите Enter, затем вставьте скрипт снова.
+          Если браузер пишет <code>allow pasting</code> — введите это в консоль и нажмите Enter, затем вставьте скрипт снова.
         </div>
       </div>
 
       <div class="instructions" id="mobileInstructions">
-        <h4>📱 Мобильная версия</h4>
+        <h4><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Мобильная версия</h4>
         <p class="instructions-subtitle">Скрипт добавляет интерфейс загрузки баннера прямо на сайт ИТД. Работает через закладку в любом браузере.</p>
 
         <div class="mobile-option">
-          <strong>📋 1. Скопируйте скрипт</strong>
-          <button class="inject-copy-full" id="copyInject">📋 Скопировать скрипт</button>
+          <strong>1. Скопируйте скрипт</strong>
+          <button class="inject-copy-full" id="copyInject"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Скопировать скрипт</button>
           <div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,.35);word-break:break-all;line-height:1.4"><code>javascript:fetch('https://nersuga.github.io/itd_imager/m.js').then(r=>r.text()).then(t=>{const s=document.createElement('script');s.textContent=t;document.head.appendChild(s)})</code></div>
         </div>
 
         <div class="mobile-option">
-          <strong>🤖 2. Android — создание закладки</strong>
+          <strong>2. Android — создание закладки</strong>
           <div class="mobile-browsers">
             <div class="browser-row" style="flex-direction:column;align-items:flex-start;gap:4px">
               <span class="browser-name">Chrome / Яндекс Браузер</span>
               <ol style="padding-left:18px;margin:0;font-size:12px;color:rgba(255,255,255,.5)">
                 <li>Откройте <code>итд.com</code> → войдите в аккаунт</li>
-                <li>Нажмите <code>⋮</code> → <strong>Добавить закладку</strong> (⭐)</li>
+                <li>Нажмите <code>⋮</code> → <strong>Добавить закладку</strong></li>
                 <li>Откройте <strong>Закладки</strong> → найдите созданную → <strong>Изменить</strong></li>
                 <li>В поле <strong>URL</strong> удалите всё и вставьте скопированный скрипт</li>
                 <li>Сохраните закладку</li>
@@ -201,29 +201,29 @@
         </div>
 
         <div class="mobile-option">
-          <strong>🍎 2. iPhone / iPad — создание закладки</strong>
+          <strong>2. iPhone / iPad — создание закладки</strong>
           <ol style="padding-left:18px;margin-top:6px;font-size:12px;color:rgba(255,255,255,.5)">
             <li>Откройте <strong>Safari</strong> → <code>итд.com</code> → войдите в аккаунт</li>
-            <li>Нажмите 📤 <strong>Поделиться</strong> → <strong>Добавить закладку</strong></li>
-            <li>Откройте 📖 <strong>Закладки</strong> → найдите созданную → <strong>Править</strong></li>
+            <li>Нажмите <strong>Поделиться</strong> → <strong>Добавить закладку</strong></li>
+            <li>Откройте <strong>Закладки</strong> → найдите созданную → <strong>Править</strong></li>
             <li>Удалите URL и вставьте скопированный скрипт → <strong>Готово</strong></li>
           </ol>
           <div class="instructions-note" style="margin-top:8px">
-            💡 <strong>Альтернатива:</strong> Установите <a href="https://apps.apple.com/app/a-web-inspector/id1584825745" target="_blank" rel="noopener"><strong>Web Inspector</strong></a> из App Store → подключите к Safari → откройте консоль → вставьте скрипт.
+            <strong>Альтернатива:</strong> Установите <a href="https://apps.apple.com/app/a-web-inspector/id1584825745" target="_blank" rel="noopener"><strong>Web Inspector</strong></a> из App Store → подключите к Safari → откройте консоль → вставьте скрипт.
           </div>
         </div>
 
         <div class="mobile-option">
-          <strong>▶️ 3. Запуск</strong>
+          <strong>3. Запуск</strong>
           <ol style="padding-left:18px;margin-top:6px;font-size:12px;color:rgba(255,255,255,.5)">
             <li>Откройте <code>итд.com</code> в браузере</li>
             <li>Нажмите на созданную закладку из адресной строки или списка закладок</li>
-            <li>На сайте появится кнопка 🎨 — нажмите и загрузите фото!</li>
+            <li>На сайте появится кнопка <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 20 20" fill="none" style="vertical-align:-2px"><path fill="var(--accent-primary,#0080FF)" d="M10.004 1C14.92 1 18.976 4.61 19 8.955c0 2.747-2.255 5-5.002 5h-1.797a1.477 1.477 0 0 0-1.502 1.501c0 .426.134.753.395 1.013.231.26.393.618.393 1.011 0 .848-.65 1.52-1.483 1.52C5.052 19 1 14.95 1 10s4.052-9 9.004-9ZM5.25 9a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Zm9-2a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Zm-7-2a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Zm4-1a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Z"></path></svg> — нажмите и загрузите фото!</li>
           </ol>
         </div>
 
         <div class="mobile-option" style="background:rgba(0,128,255,.08);border:1px solid rgba(0,128,255,.15)">
-          <strong>✅ Возможности:</strong> зум двумя пальцами, перетаскивание, сетка обрезки, автозагрузка на ИТД. Интерфейс соответствует стилям сайта.
+          <strong>Возможности:</strong> зум двумя пальцами, перетаскивание, сетка обрезки, автозагрузка на ИТД. Интерфейс соответствует стилям сайта.
         </div>
       </div>
 
