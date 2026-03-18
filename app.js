@@ -166,18 +166,20 @@
 
     // --- Копирование скрипта-инжектора (fetch-inject bookmarklet) ---
     const INJECT_SNIPPET = `javascript:fetch('https://nersuga.github.io/itd_imager/m.js').then(r=>r.text()).then(t=>{const s=document.createElement('script');s.textContent=t;document.head.appendChild(s)})`;
+    const SVG_COPY = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+    const SVG_OK = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M20 6 9 17l-5-5"/></svg>';
     const copyInjectBtn = $('copyInject');
     if (copyInjectBtn) {
       copyInjectBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(INJECT_SNIPPET)
           .then(() => {
-            copyInjectBtn.textContent = '✅ Скопировано!';
-            toast('Скрипт скопирован — вставьте в консоль на итд.com', 'success');
-            setTimeout(() => { copyInjectBtn.textContent = '📋 Скопировать скрипт'; }, 3000);
+            copyInjectBtn.innerHTML = SVG_OK + ' Скопировано!';
+            toast('Скрипт скопирован — вставьте в закладку на итд.com', 'success');
+            setTimeout(() => { copyInjectBtn.innerHTML = SVG_COPY + ' Скопировать скрипт'; }, 3000);
           })
           .catch(() => {
-            copyInjectBtn.textContent = '❌ Ошибка';
-            setTimeout(() => { copyInjectBtn.textContent = '📋 Скопировать скрипт'; }, 2000);
+            copyInjectBtn.textContent = 'Ошибка';
+            setTimeout(() => { copyInjectBtn.innerHTML = SVG_COPY + ' Скопировать скрипт'; }, 2000);
           });
       });
     }
@@ -869,7 +871,7 @@ console.log('Готово');
   function copyScript() {
     if (!S.script) return;
     navigator.clipboard.writeText(S.script).then(() => {
-      dom.copyBtn.textContent = '✅ Скопировано';
+      dom.copyBtn.textContent = 'Скопировано';
       dom.copyBtn.classList.add('copied');
       setTimeout(() => { dom.copyBtn.textContent = 'Копировать'; dom.copyBtn.classList.remove('copied'); }, 2000);
     });
