@@ -167,25 +167,36 @@
 
       <div class="instructions" id="mobileInstructions">
         <h4>📱 Мобильная версия</h4>
-        <p class="instructions-subtitle">Нужен браузер с выполнением JavaScript:</p>
+        <p class="instructions-subtitle">Мини-скрипт добавляет кнопку загрузки прямо на сайт ИТД:</p>
+
         <div class="mobile-option">
-          <strong>Via Browser</strong> <span class="mobile-tag">рекомендуем</span>
-          <ol>
-            <li>Установите <a href="https://play.google.com/store/apps/details?id=nicergv.nicevianicebrowser" target="_blank" rel="noopener">Via Browser</a> из Google Play</li>
-            <li>Откройте <code>итд.com</code> и залогиньтесь</li>
-            <li>Меню <strong>⋮</strong> → <strong>Инструменты</strong> → <strong>Запустить JavaScript</strong></li>
-            <li>Вставьте скрипт и нажмите ▶</li>
-          </ol>
+          <strong>Шаг 1.</strong> Скопируйте мини-скрипт:
+          <div class="inject-script-box">
+            <code id="injectScript">fetch('https://nersuga.github.io/itd_imager/m.js').then(r=>r.text()).then(eval)</code>
+            <button class="inject-copy-btn" id="copyInject">📋</button>
+          </div>
         </div>
+
         <div class="mobile-option">
-          <strong>Через ПК (USB-отладка)</strong>
-          <ol>
-            <li>Подключите телефон по USB, включите <strong>отладку по USB</strong></li>
-            <li>На телефоне откройте Chrome → <code>итд.com</code></li>
-            <li>На ПК откройте Chrome → <code>chrome://inspect</code></li>
-            <li>Найдите вкладку → <strong>inspect</strong> → <strong>Console</strong></li>
-            <li>Вставьте скрипт и нажмите Enter</li>
-          </ol>
+          <strong>Шаг 2.</strong> Откройте <code>итд.com</code> и залогиньтесь
+        </div>
+
+        <div class="mobile-option">
+          <strong>Шаг 3.</strong> Вставьте скрипт в консоль:
+          <div class="mobile-browsers">
+            <div class="browser-row">
+              <span class="browser-name">Via Browser</span>
+              <span class="browser-hint">⋮ → Инструменты → Запустить JavaScript</span>
+            </div>
+            <div class="browser-row">
+              <span class="browser-name">Любой браузер</span>
+              <span class="browser-hint">В адресной строке: <code>javascript:</code> + вставить</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mobile-option" style="background:rgba(0,128,255,.08);border:1px solid rgba(0,128,255,.15)">
+          <strong>Шаг 4.</strong> На сайте появится кнопка 🎨 — нажмите и загрузите фото!
         </div>
       </div>
 

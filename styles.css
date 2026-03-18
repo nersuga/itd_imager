@@ -407,6 +407,63 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
   margin-left: 4px;
 }
 
+.inject-script-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  background: var(--bg-primary);
+  border-radius: 10px;
+  padding: 10px 12px;
+  overflow: hidden;
+}
+
+.inject-script-box code {
+  flex: 1;
+  font-size: 11px;
+  word-break: break-all;
+  line-height: 1.4;
+  color: var(--accent-primary);
+  background: none;
+  padding: 0;
+}
+
+.inject-copy-btn {
+  flex-shrink: 0;
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-tertiary);
+  border: none; border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.inject-copy-btn:active {
+  transform: scale(.9);
+  background: var(--bg-hover);
+}
+
+.mobile-browsers {
+  margin-top: 8px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+
+.browser-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px;
+}
+
+.browser-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.browser-hint {
+  color: var(--text-tertiary);
+}
+
 .script-output { position: relative; margin-top: 12px; }
 .script-output pre {
   background: var(--bg-primary); border-radius: 12px; padding: 16px;

@@ -164,6 +164,19 @@
     dom.generateBtn.addEventListener('click', generate);
     dom.copyBtn.addEventListener('click', copyScript);
 
+    // --- Копирование мини-скрипта для мобильной инъекции ---
+    const copyInjectBtn = $('copyInject');
+    const injectCode = $('injectScript');
+    if (copyInjectBtn && injectCode) {
+      copyInjectBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(injectCode.textContent).then(() => {
+          copyInjectBtn.textContent = '✅';
+          setTimeout(() => copyInjectBtn.textContent = '📋', 2000);
+          toast('Мини-скрипт скопирован!', 'success');
+        });
+      });
+    }
+
     // --- Crop-взаимодействия (перетаскивание, пинч, скролл) ---
     initCropInteractions();
 
