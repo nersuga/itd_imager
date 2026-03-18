@@ -12,14 +12,12 @@
 <body>
   <div class="app-container">
 
-    <!-- Header -->
     <header class="app-header">
       <div class="app-logo">🎨</div>
       <span class="app-name">ITD Imager</span>
       <span class="app-desc">Автозагрузка изображений на ИТД</span>
     </header>
 
-    <!-- Upload + Crop -->
     <div class="card">
       <div class="card-title">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -38,7 +36,6 @@
       </div>
       <input type="file" id="fileInput" accept="image/*" style="display:none">
 
-      <!-- Crop Editor -->
       <div id="cropEditor" class="crop-editor hidden">
         <canvas id="cropCanvas"></canvas>
         <div class="crop-hint" id="cropHint">Перетаскивайте для обрезки · Скролл для зума</div>
@@ -52,7 +49,6 @@
         </div>
       </div>
 
-      <!-- Result Preview -->
       <div id="previewSection" class="hidden">
         <div class="preview-container" id="previewGrid">
           <div class="preview-box">
@@ -78,7 +74,6 @@
       </div>
     </div>
 
-    <!-- Settings -->
     <div class="card">
       <div class="card-title">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -150,7 +145,6 @@
       </div>
     </div>
 
-    <!-- Output -->
     <div class="card">
       <div class="card-title">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -159,7 +153,6 @@
         Скрипт
       </div>
 
-      <!-- Desktop instructions -->
       <div class="instructions" id="desktopInstructions">
         <h4>💻 Десктоп</h4>
         <ol>
@@ -168,7 +161,6 @@
         </ol>
       </div>
 
-      <!-- Mobile bookmarklet -->
       <div class="bookmarklet-section" id="mobileSection">
         <div class="bookmarklet-box">
           <h4 style="font-size:14px;font-weight:600">📱 Мобильная версия</h4>
