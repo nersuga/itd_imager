@@ -430,3 +430,50 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
 @media (max-width: 640px) {
   .preview-container { grid-template-columns: 1fr; }
 }
+
+/* ── Footer ── */
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 16px 8px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--bg-tertiary);
+  transition: all .2s ease;
+}
+
+.footer-link svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.footer-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+  transform: translateY(-1px);
+}
+
+.footer-divider {
+  color: var(--text-tertiary);
+  font-size: 16px;
+  user-select: none;
+}
+
+.footer-credit {
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: .3px;
+}
