@@ -164,8 +164,8 @@
     dom.generateBtn.addEventListener('click', generate);
     dom.copyBtn.addEventListener('click', copyScript);
 
-    // --- Копирование скрипта-инжектора (fetch-inject сниппет) ---
-    const INJECT_SNIPPET = `fetch('https://nersuga.github.io/itd_imager/m.js').then(r=>r.text()).then(t=>{const s=document.createElement('script');s.textContent=t;document.head.appendChild(s)})`;
+    // --- Копирование скрипта-инжектора (fetch-inject bookmarklet) ---
+    const INJECT_SNIPPET = `javascript:fetch('https://nersuga.github.io/itd_imager/m.js').then(r=>r.text()).then(t=>{const s=document.createElement('script');s.textContent=t;document.head.appendChild(s)})`;
     const copyInjectBtn = $('copyInject');
     if (copyInjectBtn) {
       copyInjectBtn.addEventListener('click', () => {

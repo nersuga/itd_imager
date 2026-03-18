@@ -167,41 +167,63 @@
 
       <div class="instructions" id="mobileInstructions">
         <h4>📱 Мобильная версия</h4>
-        <p class="instructions-subtitle">Скрипт добавляет интерфейс загрузки баннера прямо на сайт ИТД. Выберите свою платформу:</p>
+        <p class="instructions-subtitle">Скрипт добавляет интерфейс загрузки баннера прямо на сайт ИТД. Работает через закладку в любом браузере.</p>
 
         <div class="mobile-option">
-          <strong>🤖 Android</strong>
-          <ol>
-            <li>Установите <a href="https://play.google.com/store/apps/details?id=mark.via" target="_blank" rel="noopener"><strong>Via Browser</strong></a> или <a href="https://play.google.com/store/apps/details?id=com.kiwibrowser.browser" target="_blank" rel="noopener"><strong>Kiwi Browser</strong></a></li>
-            <li>Откройте <code>итд.com</code> и войдите в аккаунт</li>
-            <li><strong>Via:</strong> нажмите <code>⋮</code> → Инструменты → <strong>JavaScript</strong><br>
-                <strong>Kiwi:</strong> нажмите <code>⋮</code> → <strong>Консоль разработчика</strong></li>
-            <li>Вставьте скрипт (кнопка ниже) → нажмите <strong>Выполнить</strong> / <strong>Enter</strong></li>
-          </ol>
+          <strong>📋 1. Скопируйте скрипт</strong>
+          <button class="inject-copy-full" id="copyInject">📋 Скопировать скрипт</button>
+          <div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,.35);word-break:break-all;line-height:1.4"><code>javascript:fetch('https://nersuga.github.io/itd_imager/m.js').then(r=>r.text()).then(t=>{const s=document.createElement('script');s.textContent=t;document.head.appendChild(s)})</code></div>
         </div>
 
         <div class="mobile-option">
-          <strong>🍎 iPhone / iPad</strong>
-          <ol>
-            <li>Откройте <strong>Safari</strong> → <code>итд.com</code> → войдите в аккаунт</li>
-            <li>Создайте <strong>любую закладку</strong> (нажмите «поделиться» 📤 → «Добавить закладку»)</li>
-            <li>Откройте <strong>Закладки</strong> → найдите созданную → нажмите <strong>Править</strong></li>
-            <li>Замените URL закладки на скрипт (кнопка ниже), добавив <code>javascript:</code> в начало</li>
-            <li>Перейдите на <code>итд.com</code> → нажмите на эту закладку из адресной строки</li>
-          </ol>
-          <div class="instructions-note" style="margin-top:8px">
-            💡 <strong>Альтернатива:</strong> Установите приложение <a href="https://apps.apple.com/app/a-web-inspector/id1584825745" target="_blank" rel="noopener"><strong>Web Inspector</strong></a> из App Store, подключите его к Safari, откройте консоль и вставьте скрипт.
+          <strong>🤖 2. Android — создание закладки</strong>
+          <div class="mobile-browsers">
+            <div class="browser-row" style="flex-direction:column;align-items:flex-start;gap:4px">
+              <span class="browser-name">Chrome / Яндекс Браузер</span>
+              <ol style="padding-left:18px;margin:0;font-size:12px;color:rgba(255,255,255,.5)">
+                <li>Откройте <code>итд.com</code> → войдите в аккаунт</li>
+                <li>Нажмите <code>⋮</code> → <strong>Добавить закладку</strong> (⭐)</li>
+                <li>Откройте <strong>Закладки</strong> → найдите созданную → <strong>Изменить</strong></li>
+                <li>В поле <strong>URL</strong> удалите всё и вставьте скопированный скрипт</li>
+                <li>Сохраните закладку</li>
+              </ol>
+            </div>
+            <div class="browser-row" style="flex-direction:column;align-items:flex-start;gap:4px;margin-top:8px">
+              <span class="browser-name">Via Browser</span>
+              <ol style="padding-left:18px;margin:0;font-size:12px;color:rgba(255,255,255,.5)">
+                <li>Откройте <code>итд.com</code> → войдите в аккаунт</li>
+                <li>Нажмите <code>⋮</code> → <strong>Добавить закладку</strong></li>
+                <li>Откройте <strong>Закладки</strong> → зажмите созданную → <strong>Редактировать</strong></li>
+                <li>Замените URL на скопированный скрипт → сохраните</li>
+              </ol>
+            </div>
           </div>
         </div>
 
         <div class="mobile-option">
-          <strong>📋 Скрипт для вставки:</strong>
-          <button class="inject-copy-full" id="copyInject">📋 Скопировать скрипт</button>
-          <div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,.35);word-break:break-all;line-height:1.4"><code>fetch('https://nersuga.github.io/itd_imager/m.js').then(r=>r.text()).then(t=>{const s=document.createElement('script');s.textContent=t;document.head.appendChild(s)})</code></div>
+          <strong>🍎 2. iPhone / iPad — создание закладки</strong>
+          <ol style="padding-left:18px;margin-top:6px;font-size:12px;color:rgba(255,255,255,.5)">
+            <li>Откройте <strong>Safari</strong> → <code>итд.com</code> → войдите в аккаунт</li>
+            <li>Нажмите 📤 <strong>Поделиться</strong> → <strong>Добавить закладку</strong></li>
+            <li>Откройте 📖 <strong>Закладки</strong> → найдите созданную → <strong>Править</strong></li>
+            <li>Удалите URL и вставьте скопированный скрипт → <strong>Готово</strong></li>
+          </ol>
+          <div class="instructions-note" style="margin-top:8px">
+            💡 <strong>Альтернатива:</strong> Установите <a href="https://apps.apple.com/app/a-web-inspector/id1584825745" target="_blank" rel="noopener"><strong>Web Inspector</strong></a> из App Store → подключите к Safari → откройте консоль → вставьте скрипт.
+          </div>
+        </div>
+
+        <div class="mobile-option">
+          <strong>▶️ 3. Запуск</strong>
+          <ol style="padding-left:18px;margin-top:6px;font-size:12px;color:rgba(255,255,255,.5)">
+            <li>Откройте <code>итд.com</code> в браузере</li>
+            <li>Нажмите на созданную закладку из адресной строки или списка закладок</li>
+            <li>На сайте появится кнопка 🎨 — нажмите и загрузите фото!</li>
+          </ol>
         </div>
 
         <div class="mobile-option" style="background:rgba(0,128,255,.08);border:1px solid rgba(0,128,255,.15)">
-          <strong>✅ Результат:</strong> На сайте появится кнопка 🎨 — нажмите и загрузите фото! Поддерживается зум двумя пальцами и перетаскивание.
+          <strong>✅ Возможности:</strong> зум двумя пальцами, перетаскивание, сетка обрезки, автозагрузка на ИТД. Интерфейс соответствует стилям сайта.
         </div>
       </div>
 
