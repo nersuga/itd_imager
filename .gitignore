@@ -1,0 +1,27 @@
+# ── Dependencies ──
+node_modules/
+
+# ── Build ──
+dist/
+build/
+.next/
+
+# ── Environment ──
+.env
+.env.local
+.env.*.local
+
+# ── Downloaded site bundles (analysis only) ──
+index-*.js
+index-*.css
+@nersik
+
+# ── IDE / System ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini

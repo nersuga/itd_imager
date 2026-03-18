@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ITD Imager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="app-logo">🎨</div>
+      <span class="app-name">ITD Imager</span>
+      <span class="app-desc">Автозагрузка изображений на ИТД</span>
+    </header>
+
+    <!-- Upload + Crop -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/>
+        </svg>
+        Изображение
+      </div>
+
+      <div id="dropzone" class="dropzone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+          <path d="M12 12v9"/><path d="M8 17l4-5 4 5"/>
+        </svg>
+        <div class="text-main">Перетащите или нажмите</div>
+        <div class="text-hint">PNG, JPG, WebP, GIF</div>
+      </div>
+      <input type="file" id="fileInput" accept="image/*" style="display:none">
+
+      <!-- Crop Editor -->
+      <div id="cropEditor" class="crop-editor hidden">
+        <canvas id="cropCanvas"></canvas>
+        <div class="crop-hint" id="cropHint">Перетаскивайте для обрезки · Скролл для зума</div>
+      </div>
+      <div id="cropControls" class="crop-controls hidden">
+        <span class="zoom-info" id="zoomInfo">100%</span>
+        <div class="zoom-btns">
+          <button class="zoom-btn" id="zoomOut" title="Уменьшить">−</button>
+          <button class="zoom-btn" id="zoomReset" title="Сбросить" style="font-size:12px">↺</button>
+          <button class="zoom-btn" id="zoomIn" title="Увеличить">+</button>
+        </div>
+      </div>
+
+      <!-- Result Preview -->
+      <div id="previewSection" class="hidden">
+        <div class="preview-container" id="previewGrid">
+          <div class="preview-box">
+            <span class="label">Результат</span>
+            <canvas id="resultCanvas"></canvas>
+          </div>
+          <div class="preview-box hidden" id="quantizedBox">
+            <span class="label" id="resultLabel">Квантизовано</span>
+            <canvas id="quantizedCanvas"></canvas>
+          </div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-item">
+            <span class="stat-value" id="statColors">—</span>
+            <span class="stat-label">Цветов</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="statSize">—</span>
+            <span class="stat-label">Размер</span>
+          </div>
+        </div>
+        <div class="palette-preview" id="palettePreview"></div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+        Настройки
+      </div>
+
+      <div class="mode-toggle">
+        <div class="indicator left" id="modeIndicator"></div>
+        <button class="active" data-mode="api" id="modeApi">⚡ API</button>
+        <button data-mode="draw" id="modeDraw">🎨 Рисование</button>
+      </div>
+
+      <div class="settings-grid">
+        <div class="setting-row">
+          <div class="setting-info"><span class="setting-title">Тип</span><span class="setting-desc">Размер холста</span></div>
+          <div class="setting-control">
+            <select id="canvasType">
+              <option value="banner">Баннер 1100×380</option>
+              <option value="post">Пост 800×500</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info"><span class="setting-title">Качество</span><span class="setting-desc">Формат выхода</span></div>
+          <div class="setting-control">
+            <select id="imageQuality">
+              <option value="png">PNG (без потерь)</option>
+              <option value="jpeg-95">JPEG 95%</option>
+              <option value="jpeg-85" selected>JPEG 85%</option>
+              <option value="jpeg-70">JPEG 70%</option>
+              <option value="webp-90">WebP 90%</option>
+              <option value="webp-75">WebP 75%</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-row hidden" id="colorsSetting">
+          <div class="setting-info"><span class="setting-title">Цвета</span><span class="setting-desc">Палитра</span></div>
+          <div class="setting-control">
+            <div class="range-wrap">
+              <input type="range" id="colorCount" min="2" max="256" value="64">
+              <span class="range-val" id="colorCountValue">64</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-row hidden" id="brushSizeSetting">
+          <div class="setting-info"><span class="setting-title">Кисть</span><span class="setting-desc">Размер px</span></div>
+          <div class="setting-control">
+            <select id="brushSize">
+              <option value="2">2px</option><option value="4" selected>4px</option>
+              <option value="8">8px</option><option value="12">12px</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-row hidden" id="speedSetting">
+          <div class="setting-info"><span class="setting-title">Скорость</span><span class="setting-desc">Задержка</span></div>
+          <div class="setting-control">
+            <select id="drawSpeed">
+              <option value="0">Максимум</option><option value="1" selected>Быстро</option>
+              <option value="5">Средне</option><option value="15">Медленно</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+        </svg>
+        Скрипт
+      </div>
+
+      <!-- Desktop instructions -->
+      <div class="instructions" id="desktopInstructions">
+        <h4>💻 Десктоп</h4>
+        <ol>
+          <li>Откройте <code>итд.com</code> и залогиньтесь</li>
+          <li><code>F12</code> → Console → вставьте скрипт</li>
+        </ol>
+      </div>
+
+      <!-- Mobile bookmarklet -->
+      <div class="bookmarklet-section" id="mobileSection">
+        <div class="bookmarklet-box">
+          <h4 style="font-size:14px;font-weight:600">📱 Мобильная версия</h4>
+          <div class="bookmarklet-steps">
+            <ol>
+              <li>Нажмите кнопку ниже → <strong>Добавьте в закладки</strong></li>
+              <li>Откройте <strong>итд.com</strong> и залогиньтесь</li>
+              <li>Откройте закладку → выберите фото → готово!</li>
+            </ol>
+          </div>
+          <a class="bookmarklet-link" id="bookmarkletLink" href="#">
+            📱 Установить букмарклет
+          </a>
+          <button class="btn btn-sm" id="copyBookmarklet" style="align-self:center;width:auto;background:var(--bg-tertiary);color:var(--text-primary)">
+            📋 Скопировать букмарклет
+          </button>
+        </div>
+      </div>
+
+      <button id="generateBtn" class="btn btn-primary" disabled style="margin-top:16px">Сгенерировать скрипт</button>
+
+      <div id="scriptOutput" class="script-output hidden">
+        <button class="copy-btn" id="copyBtn">Копировать</button>
+        <pre id="scriptPre"></pre>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
