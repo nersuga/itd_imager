@@ -164,23 +164,20 @@
     dom.generateBtn.addEventListener('click', generate);
     dom.copyBtn.addEventListener('click', copyScript);
 
-    // --- Копирование скрипта-инжектора (полный m.js) ---
+    // --- Копирование скрипта-инжектора (fetch-inject сниппет) ---
+    const INJECT_SNIPPET = `fetch('https://nersuga.github.io/itd_imager/m.js').then(r=>r.text()).then(t=>{const s=document.createElement('script');s.textContent=t;document.head.appendChild(s)})`;
     const copyInjectBtn = $('copyInject');
     if (copyInjectBtn) {
       copyInjectBtn.addEventListener('click', () => {
-        copyInjectBtn.disabled = true;
-        copyInjectBtn.textContent = '⏳ Загрузка...';
-        fetch('./m.js')
-          .then(r => r.text())
-          .then(code => navigator.clipboard.writeText(code))
+        navigator.clipboard.writeText(INJECT_SNIPPET)
           .then(() => {
             copyInjectBtn.textContent = '✅ Скопировано!';
             toast('Скрипт скопирован — вставьте в консоль на итд.com', 'success');
-            setTimeout(() => { copyInjectBtn.textContent = '📋 Скопировать скрипт'; copyInjectBtn.disabled = false; }, 3000);
+            setTimeout(() => { copyInjectBtn.textContent = '📋 Скопировать скрипт'; }, 3000);
           })
           .catch(() => {
             copyInjectBtn.textContent = '❌ Ошибка';
-            setTimeout(() => { copyInjectBtn.textContent = '📋 Скопировать скрипт'; copyInjectBtn.disabled = false; }, 2000);
+            setTimeout(() => { copyInjectBtn.textContent = '📋 Скопировать скрипт'; }, 2000);
           });
       });
     }

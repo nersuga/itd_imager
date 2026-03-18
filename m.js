@@ -9,7 +9,7 @@
 if(document.getElementById('itd-fab'))return;
 
 var SIZES={banner:[1100,380],post:[800,500]};
-var state={img:null,zoom:1,panX:0,panY:0,dragging:false,lastX:0,lastY:0,type:'banner'};
+var state={img:null,zoom:1,panX:0,panY:0,dragging:false,lastX:0,lastY:0,type:'banner',pinchDist:0};
 
 // === CSS ===
 var st=document.createElement('style');
@@ -21,7 +21,8 @@ st.textContent='#itd-fab{position:fixed!important;bottom:24px!important;right:24
 +'#itd-ov.on #itd-md{transform:translateY(0)!important}'
 +'#itd-md *{box-sizing:border-box!important;margin:0!important;padding:0!important}'
 +'#itd-md .hd{width:36px!important;height:4px!important;border-radius:2px!important;background:rgba(255,255,255,.2)!important;margin:0 auto 14px!important}'
-+'#itd-md .tt{text-align:center!important;font-size:17px!important;font-weight:700!important;margin:0 0 4px!important;color:#f5f5f5!important}'
++'#itd-md .tt{display:flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;font-size:17px!important;font-weight:700!important;margin:0 0 4px!important;color:#f5f5f5!important}'
++'#itd-md .tt svg{width:36px!important;height:18px!important;flex-shrink:0!important}'
 +'#itd-md .sb{text-align:center!important;font-size:12px!important;color:rgba(255,255,255,.35)!important;margin:0 0 16px!important}'
 +'#itd-md .rw{display:flex!important;gap:8px!important;margin:0 0 12px!important}'
 +'#itd-md .sl{flex:1!important;padding:10px 12px!important;border-radius:10px!important;border:none!important;background:#2a2a2c!important;color:#fff!important;font-size:13px!important;font-family:inherit!important;appearance:none!important;-webkit-appearance:none!important;outline:none!important}'
@@ -49,6 +50,9 @@ st.textContent='#itd-fab{position:fixed!important;bottom:24px!important;right:24
 +'#itd-md .bg{background:#22c55e!important;color:#fff!important}';
 document.head.appendChild(st);
 
+// === SVG Logo ===
+var SVG_LOGO='<svg xmlns="http://www.w3.org/2000/svg" width="36" height="18" fill="none"><path fill="currentColor" d="M12 3V0h12v3h-4v11h-4V3h-4Z"></path><path fill="currentColor" d="M12 3V0h12v3h-4v11h-4V3h-4ZM9 0 3 9V0H0v14h3l6-9v9h3V0H9Z"></path><path fill="currentColor" fill-rule="evenodd" d="M34 11h2v7h-3v-4h-9v4h-3v-7c3 0 3-4 3-11h10v11Zm-7-8v8h4V3h-4Z" clip-rule="evenodd"></path></svg>';
+
 // === FAB ===
 var fab=document.createElement('button');
 fab.id='itd-fab';
@@ -59,13 +63,13 @@ document.body.appendChild(fab);
 // === MODAL ===
 function openModal(){
 if(document.getElementById('itd-ov'))return;
-state.img=null;state.zoom=1;state.panX=0;state.panY=0;state.type='banner';
+state.img=null;state.zoom=1;state.panX=0;state.panY=0;state.type='banner';state.pinchDist=0;
 
 var o=document.createElement('div');
 o.id='itd-ov';
 o.innerHTML='<div id="itd-md">'
 +'<div class="hd"></div>'
-+'<div class="tt">\uD83C\uDFA8 ITD Imager</div>'
++'<div class="tt">'+SVG_LOGO+' Imager</div>'
 +'<div class="sb">\u0417\u0430\u0433\u0440\u0443\u0437\u043A\u0430 \u0431\u0430\u043D\u043D\u0435\u0440\u0430 \u043D\u0430 \u0418\u0422\u0414</div>'
 +'<div class="rw">'
 +'<select class="sl" id="itd-tp"><option value="banner">\u0411\u0430\u043D\u043D\u0435\u0440 1100\u00D7380</option><option value="post">\u041F\u043E\u0441\u0442 800\u00D7500</option></select>'
@@ -146,24 +150,57 @@ o.querySelector('#itd-zi').addEventListener('click',function(){state.zoom=Math.m
 o.querySelector('#itd-zo').addEventListener('click',function(){state.zoom=Math.max(state.zoom/1.25,.5);renderCrop();});
 o.querySelector('#itd-zr').addEventListener('click',function(){state.zoom=1;state.panX=0;state.panY=0;renderCrop();});
 
-// Pan (touch + mouse)
+// Pan — single touch drag
 var touch0=null;
-cv.addEventListener('mousedown',function(e){state.dragging=true;state.lastX=e.clientX;state.lastY=e.clientY;e.preventDefault();});
-cv.addEventListener('mousemove',function(e){if(!state.dragging)return;state.panX+=e.clientX-state.lastX;state.panY+=e.clientY-state.lastY;state.lastX=e.clientX;state.lastY=e.clientY;renderCrop();});
-cv.addEventListener('mouseup',function(){state.dragging=false;});
-cv.addEventListener('mouseleave',function(){state.dragging=false;});
-
 cv.addEventListener('touchstart',function(e){
-  if(e.touches.length===1){touch0={x:e.touches[0].clientX,y:e.touches[0].clientY};e.preventDefault();}
+  if(e.touches.length===1){
+    touch0={x:e.touches[0].clientX,y:e.touches[0].clientY};
+    e.preventDefault();
+  }
+  // Pinch start
+  if(e.touches.length===2){
+    state.pinchDist=Math.hypot(
+      e.touches[1].clientX-e.touches[0].clientX,
+      e.touches[1].clientY-e.touches[0].clientY
+    );
+    e.preventDefault();
+  }
 },{passive:false});
+
 cv.addEventListener('touchmove',function(e){
+  // Pinch zoom (two fingers)
+  if(e.touches.length===2){
+    var dist=Math.hypot(
+      e.touches[1].clientX-e.touches[0].clientX,
+      e.touches[1].clientY-e.touches[0].clientY
+    );
+    if(state.pinchDist>0){
+      var ratio=dist/state.pinchDist;
+      state.zoom=Math.max(.5,Math.min(5,state.zoom*ratio));
+      renderCrop();
+    }
+    state.pinchDist=dist;
+    e.preventDefault();
+    return;
+  }
+  // Single finger drag
   if(e.touches.length===1&&touch0){
     var t=e.touches[0];
     state.panX+=t.clientX-touch0.x;state.panY+=t.clientY-touch0.y;
     touch0={x:t.clientX,y:t.clientY};renderCrop();e.preventDefault();
   }
 },{passive:false});
-cv.addEventListener('touchend',function(){touch0=null;});
+
+cv.addEventListener('touchend',function(e){
+  if(e.touches.length<2)state.pinchDist=0;
+  if(e.touches.length===0)touch0=null;
+});
+
+// Mouse (for testing)
+cv.addEventListener('mousedown',function(e){state.dragging=true;state.lastX=e.clientX;state.lastY=e.clientY;e.preventDefault();});
+cv.addEventListener('mousemove',function(e){if(!state.dragging)return;state.panX+=e.clientX-state.lastX;state.panY+=e.clientY-state.lastY;state.lastX=e.clientX;state.lastY=e.clientY;renderCrop();});
+cv.addEventListener('mouseup',function(){state.dragging=false;});
+cv.addEventListener('mouseleave',function(){state.dragging=false;});
 
 // Wheel zoom
 cv.addEventListener('wheel',function(e){
