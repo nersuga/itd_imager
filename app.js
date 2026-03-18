@@ -164,16 +164,24 @@
     dom.generateBtn.addEventListener('click', generate);
     dom.copyBtn.addEventListener('click', copyScript);
 
-    // --- Копирование мини-скрипта для мобильной инъекции ---
+    // --- Копирование скрипта-инжектора (полный m.js) ---
     const copyInjectBtn = $('copyInject');
-    const injectCode = $('injectScript');
-    if (copyInjectBtn && injectCode) {
+    if (copyInjectBtn) {
       copyInjectBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(injectCode.textContent).then(() => {
-          copyInjectBtn.textContent = '✅';
-          setTimeout(() => copyInjectBtn.textContent = '📋', 2000);
-          toast('Мини-скрипт скопирован!', 'success');
-        });
+        copyInjectBtn.disabled = true;
+        copyInjectBtn.textContent = '⏳ Загрузка...';
+        fetch('./m.js')
+          .then(r => r.text())
+          .then(code => navigator.clipboard.writeText(code))
+          .then(() => {
+            copyInjectBtn.textContent = '✅ Скопировано!';
+            toast('Скрипт скопирован — вставьте в консоль на итд.com', 'success');
+            setTimeout(() => { copyInjectBtn.textContent = '📋 Скопировать скрипт'; copyInjectBtn.disabled = false; }, 3000);
+          })
+          .catch(() => {
+            copyInjectBtn.textContent = '❌ Ошибка';
+            setTimeout(() => { copyInjectBtn.textContent = '📋 Скопировать скрипт'; copyInjectBtn.disabled = false; }, 2000);
+          });
       });
     }
 

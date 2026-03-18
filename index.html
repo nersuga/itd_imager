@@ -167,36 +167,33 @@
 
       <div class="instructions" id="mobileInstructions">
         <h4>📱 Мобильная версия</h4>
-        <p class="instructions-subtitle">Мини-скрипт добавляет кнопку загрузки прямо на сайт ИТД:</p>
+        <p class="instructions-subtitle">Скрипт добавляет интерфейс загрузки прямо на сайт ИТД:</p>
 
         <div class="mobile-option">
-          <strong>Шаг 1.</strong> Скопируйте мини-скрипт:
-          <div class="inject-script-box">
-            <code id="injectScript">fetch('https://nersuga.github.io/itd_imager/m.js').then(r=>r.text()).then(t=>{const s=document.createElement('script');s.textContent=t;document.head.appendChild(s)})</code>
-            <button class="inject-copy-btn" id="copyInject">📋</button>
-          </div>
+          <strong>1.</strong> Откройте <code>итд.com</code> и залогиньтесь
         </div>
 
         <div class="mobile-option">
-          <strong>Шаг 2.</strong> Откройте <code>итд.com</code> и залогиньтесь
-        </div>
-
-        <div class="mobile-option">
-          <strong>Шаг 3.</strong> Вставьте скрипт в консоль:
+          <strong>2.</strong> Откройте консоль:
           <div class="mobile-browsers">
             <div class="browser-row">
-              <span class="browser-name">Via Browser</span>
-              <span class="browser-hint">⋮ → Инструменты → Запустить JavaScript</span>
+              <span class="browser-name">ПК</span>
+              <span class="browser-hint"><code>F12</code> → Console</span>
             </div>
             <div class="browser-row">
-              <span class="browser-name">Любой браузер</span>
-              <span class="browser-hint">В адресной строке: <code>javascript:</code> + вставить</span>
+              <span class="browser-name">Via Browser</span>
+              <span class="browser-hint">⋮ → Инструменты → JavaScript</span>
             </div>
           </div>
+        </div>
+
+        <div class="mobile-option">
+          <strong>3.</strong> Скопируйте и вставьте скрипт:
+          <button class="inject-copy-full" id="copyInject">📋 Скопировать скрипт</button>
         </div>
 
         <div class="mobile-option" style="background:rgba(0,128,255,.08);border:1px solid rgba(0,128,255,.15)">
-          <strong>Шаг 4.</strong> На сайте появится кнопка 🎨 — нажмите и загрузите фото!
+          <strong>4.</strong> На сайте появится кнопка 🎨 — нажмите и загрузите фото!
         </div>
       </div>
 
