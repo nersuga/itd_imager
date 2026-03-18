@@ -1,7 +1,7 @@
 /**
- * ITD Imager - Mobile Injector (m.js)
+ * ИТД Imager - Mobile Injector (m.js)
  * Full crop interface injected directly on itd.com
- * Uses CSS variables from the original ITD site for native look
+ * Uses CSS variables from the original ИТД site for native look
  * @file m.js
  * @author nersuga
  */
@@ -19,7 +19,7 @@ function maxPanX(){if(!S.img)return 0;var sz=SIZES[S.type],s=coverScale()*S.zoom
 function maxPanY(){if(!S.img)return 0;var sz=SIZES[S.type],s=coverScale()*S.zoom;return Math.max(0,(S.img.height-sz[1]/s)/2);}
 function setZoom(z){S.zoom=clamp(z,MIN_ZOOM,MAX_ZOOM);S.panX=clamp(S.panX,-maxPanX(),maxPanX());S.panY=clamp(S.panY,-maxPanY(),maxPanY());}
 
-// === CSS (uses original ITD site CSS variables) ===
+// === CSS (uses original ИТД site CSS variables) ===
 var st=document.createElement('style');
 st.textContent=
 '#itd-fab{position:fixed!important;bottom:24px!important;right:24px!important;width:56px!important;height:56px!important;border-radius:50%!important;border:none!important;outline:none!important;background:linear-gradient(135deg,var(--accent-primary,#0080FF),#AF52DE)!important;color:#fff!important;cursor:pointer!important;z-index:99999!important;box-shadow:0 4px 24px rgba(0,0,0,.5)!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;transition:transform .2s!important;touch-action:manipulation!important}'
@@ -67,7 +67,7 @@ document.head.appendChild(st);
 // === SVG Logo ===
 var SVG_LOGO='<svg xmlns="http://www.w3.org/2000/svg" width="36" height="18" fill="none"><path fill="currentColor" d="M12 3V0h12v3h-4v11h-4V3h-4Z"></path><path fill="currentColor" d="M12 3V0h12v3h-4v11h-4V3h-4ZM9 0 3 9V0H0v14h3l6-9v9h3V0H9Z"></path><path fill="currentColor" fill-rule="evenodd" d="M34 11h2v7h-3v-4h-9v4h-3v-7c3 0 3-4 3-11h10v11Zm-7-8v8h4V3h-4Z" clip-rule="evenodd"></path></svg>';
 
-// === SVG Icons (from original ITD site) ===
+// === SVG Icons (from original ИТД site) ===
 var SVG_PALETTE='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20" fill="none"><path fill="currentColor" d="M10.004 1C14.92 1 18.976 4.61 19 8.955c0 2.747-2.255 5-5.002 5h-1.797a1.477 1.477 0 0 0-1.502 1.501c0 .426.134.753.395 1.013.231.26.393.618.393 1.011 0 .848-.65 1.52-1.483 1.52C5.052 19 1 14.95 1 10s4.052-9 9.004-9ZM5.25 9a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Zm9-2a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Zm-7-2a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Zm4-1a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Z"></path></svg>';
 var SVG_ATTACH='<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m17.867 9.208-7.659 7.659a5.003 5.003 0 1 1-7.075-7.075l7.659-7.659a3.335 3.335 0 1 1 4.716 4.717l-7.666 7.658a1.667 1.667 0 1 1-2.359-2.358l7.075-7.067"></path></svg>';
 var SVG_CHECK='<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 6 9 17l-5-5"></path></svg>';

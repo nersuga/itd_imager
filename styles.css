@@ -1,4 +1,4 @@
-/* ── ITD Imager v2 — ИТД Design System ── */
+/* ── ИТД Imager v2 — ИТД Design System ── */
 :root {
   --bg-primary: #151518;
   --bg-secondary: #1a1a1a;
@@ -600,4 +600,11 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
   font-weight: 500;
   color: var(--text-secondary);
   letter-spacing: .3px;
+}
+
+/* Mobile: hide image editor & settings cards */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
 }
