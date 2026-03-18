@@ -22,7 +22,8 @@ function setZoom(z){S.zoom=clamp(z,MIN_ZOOM,MAX_ZOOM);S.panX=clamp(S.panX,-maxPa
 // === CSS (uses original ITD site CSS variables) ===
 var st=document.createElement('style');
 st.textContent=
-'#itd-fab{position:fixed!important;bottom:24px!important;right:24px!important;width:56px!important;height:56px!important;border-radius:50%!important;border:none!important;outline:none!important;background:linear-gradient(135deg,var(--accent-primary,#0080FF),#AF52DE)!important;color:#fff!important;font-size:24px!important;cursor:pointer!important;z-index:99999!important;box-shadow:0 4px 24px rgba(0,0,0,.5)!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;transition:transform .2s!important;touch-action:manipulation!important}'
+'#itd-fab{position:fixed!important;bottom:24px!important;right:24px!important;width:56px!important;height:56px!important;border-radius:50%!important;border:none!important;outline:none!important;background:linear-gradient(135deg,var(--accent-primary,#0080FF),#AF52DE)!important;color:#fff!important;cursor:pointer!important;z-index:99999!important;box-shadow:0 4px 24px rgba(0,0,0,.5)!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;transition:transform .2s!important;touch-action:manipulation!important}'
++'#itd-fab svg{width:24px!important;height:24px!important}'
 +'#itd-fab:active{transform:scale(.9)!important}'
 +'#itd-ov{position:fixed!important;inset:0!important;background:rgba(0,0,0,.7)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;z-index:100000!important;display:flex!important;align-items:flex-end!important;justify-content:center!important;padding:0!important;opacity:0;transition:opacity .25s}'
 +'#itd-ov.on{opacity:1!important}'
@@ -37,7 +38,8 @@ st.textContent=
 +'#itd-md .sl{flex:1!important;padding:10px 12px!important;border-radius:10px!important;border:none!important;background:var(--bg-secondary,#2a2a2c)!important;color:var(--text-primary,#fff)!important;font-size:13px!important;font-family:inherit!important;appearance:none!important;-webkit-appearance:none!important;outline:none!important}'
 +'#itd-md .dp{border:2px dashed var(--border-color,rgba(255,255,255,.12))!important;border-radius:14px!important;padding:24px 12px!important;text-align:center!important;cursor:pointer!important;background:transparent!important}'
 +'#itd-md .dp:active{background:var(--bg-hover,rgba(255,255,255,.04))!important;border-color:var(--accent-primary,rgba(255,255,255,.25))!important}'
-+'#itd-md .di{font-size:28px!important;margin:0 0 6px!important;line-height:1!important}'
++'#itd-md .di{margin:0 0 6px!important;line-height:1!important;color:var(--text-tertiary,rgba(255,255,255,.3))!important}'
++'#itd-md .di svg{width:36px!important;height:36px!important}'
 +'#itd-md .dtx{font-size:13px!important;font-weight:500!important;color:var(--text-primary,#e0e0e0)!important}'
 +'#itd-md .dh{font-size:11px!important;color:var(--text-tertiary,rgba(255,255,255,.3))!important;margin:3px 0 0!important}'
 +'#itd-md .crp{position:relative!important;width:100%!important;margin:10px 0 0!important;border-radius:12px!important;overflow:hidden!important;background:#000!important;touch-action:none!important;user-select:none!important;-webkit-user-select:none!important}'
@@ -65,10 +67,15 @@ document.head.appendChild(st);
 // === SVG Logo ===
 var SVG_LOGO='<svg xmlns="http://www.w3.org/2000/svg" width="36" height="18" fill="none"><path fill="currentColor" d="M12 3V0h12v3h-4v11h-4V3h-4Z"></path><path fill="currentColor" d="M12 3V0h12v3h-4v11h-4V3h-4ZM9 0 3 9V0H0v14h3l6-9v9h3V0H9Z"></path><path fill="currentColor" fill-rule="evenodd" d="M34 11h2v7h-3v-4h-9v4h-3v-7c3 0 3-4 3-11h10v11Zm-7-8v8h4V3h-4Z" clip-rule="evenodd"></path></svg>';
 
+// === SVG Icons (from original ITD site) ===
+var SVG_PALETTE='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20" fill="none"><path fill="currentColor" d="M10.004 1C14.92 1 18.976 4.61 19 8.955c0 2.747-2.255 5-5.002 5h-1.797a1.477 1.477 0 0 0-1.502 1.501c0 .426.134.753.395 1.013.231.26.393.618.393 1.011 0 .848-.65 1.52-1.483 1.52C5.052 19 1 14.95 1 10s4.052-9 9.004-9ZM5.25 9a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Zm9-2a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Zm-7-2a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Zm4-1a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Z"></path></svg>';
+var SVG_ATTACH='<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m17.867 9.208-7.659 7.659a5.003 5.003 0 1 1-7.075-7.075l7.659-7.659a3.335 3.335 0 1 1 4.716 4.717l-7.666 7.658a1.667 1.667 0 1 1-2.359-2.358l7.075-7.067"></path></svg>';
+var SVG_CHECK='<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 6 9 17l-5-5"></path></svg>';
+
 // === FAB ===
 var fab=document.createElement('button');
 fab.id='itd-fab';
-fab.textContent='\uD83C\uDFA8';
+fab.innerHTML=SVG_PALETTE;
 fab.addEventListener('click',openModal);
 document.body.appendChild(fab);
 
@@ -86,7 +93,7 @@ o.innerHTML='<div id="itd-md">'
 +'<div class="rw">'
 +'<select class="sl" id="itd-tp"><option value="banner">\u0411\u0430\u043D\u043D\u0435\u0440 1100\u00D7380</option><option value="post">\u041F\u043E\u0441\u0442 800\u00D7500</option></select>'
 +'</div>'
-+'<div class="dp" id="itd-dp"><div class="di">\uD83D\uDCF7</div><div class="dtx">\u041D\u0430\u0436\u043C\u0438\u0442\u0435 \u0434\u043B\u044F \u0432\u044B\u0431\u043E\u0440\u0430 \u0444\u043E\u0442\u043E</div><div class="dh">PNG, JPG, WebP</div></div>'
++'<div class="dp" id="itd-dp"><div class="di">'+SVG_ATTACH+'</div><div class="dtx">\u041D\u0430\u0436\u043C\u0438\u0442\u0435 \u0434\u043B\u044F \u0432\u044B\u0431\u043E\u0440\u0430 \u0444\u043E\u0442\u043E</div><div class="dh">PNG, JPG, WebP</div></div>'
 +'<input type="file" id="itd-fi" accept="image/*" style="display:none!important">'
 +'<div class="crp" id="itd-crp" style="display:none"><canvas id="itd-cv"></canvas><div class="ch" id="itd-ch">\u041F\u0435\u0440\u0435\u0442\u0430\u0441\u043A\u0438\u0432\u0430\u0439\u0442\u0435 \u00B7 \u0429\u0438\u043F\u043E\u043A \u0434\u043B\u044F \u0437\u0443\u043C\u0430</div></div>'
 +'<div class="zm" id="itd-zm" style="display:none">'
