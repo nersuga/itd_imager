@@ -292,14 +292,28 @@ upBtn.addEventListener('click',async function(){
 
     pf.style.width='30%';stEl.textContent='\u0410\u0432\u0442\u043E\u0440\u0438\u0437\u0430\u0446\u0438\u044F\u2026';
 
-    var d=localStorage.getItem('device-id');
-    if(!d){for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.includes('device')){d=localStorage.getItem(k);break;}}}
-    if(!d)d=crypto.randomUUID();
+    // Device ID — same key as original ITD site (device_id)
+    var d=localStorage.getItem('device_id');
+    if(!d){
+      // Fallback: search for any device-related key
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(k&&(k==='device-id'||k.includes('device'))){d=localStorage.getItem(k);break;}
+      }
+    }
+    if(!d){d=crypto.randomUUID();localStorage.setItem('device_id',d);}
     var hd={'X-Device-Id':d,'X-Requested-With':'XMLHttpRequest'};
 
+    // Refresh token to get accessToken (uses httpOnly cookie)
     var r=await fetch('/api/v1/auth/refresh',{method:'POST',headers:Object.assign({},hd,{'Content-Type':'application/json'}),credentials:'include'});
-    if(!r.ok)throw new Error('\u0412\u043E\u0439\u0434\u0438\u0442\u0435 \u0432 \u0430\u043A\u043A\u0430\u0443\u043D\u0442');
-    var token=(await r.json()).accessToken;
+    if(!r.ok){
+      var errData=null;try{errData=await r.json();}catch(ex){}
+      if(errData&&errData.error&&errData.error.code)throw new Error(errData.error.detail||errData.error.message||'\u0412\u043E\u0439\u0434\u0438\u0442\u0435 \u0432 \u0430\u043A\u043A\u0430\u0443\u043D\u0442');
+      throw new Error('\u0412\u043E\u0439\u0434\u0438\u0442\u0435 \u0432 \u0430\u043A\u043A\u0430\u0443\u043D\u0442');
+    }
+    var tokenData=await r.json();
+    var token=tokenData.accessToken;
+    if(!token)throw new Error('\u041D\u0435\u0442 \u0442\u043E\u043A\u0435\u043D\u0430. \u041F\u0435\u0440\u0435\u043B\u043E\u0433\u0438\u043D\u044C\u0442\u0435\u0441\u044C');
 
     pf.style.width='55%';stEl.textContent='\u0417\u0430\u0433\u0440\u0443\u0437\u043A\u0430\u2026';
 
@@ -308,15 +322,16 @@ upBtn.addEventListener('click',async function(){
     fd.append('file',new File([blob],'banner.jpg',{type:'image/jpeg'}));
 
     var u=await fetch('/api/files/upload',{method:'POST',headers:Object.assign({'Authorization':'Bearer '+token},hd),body:fd,credentials:'include'});
-    if(!u.ok)throw new Error('\u041E\u0448\u0438\u0431\u043A\u0430: '+u.status);
+    if(!u.ok){var ue=null;try{ue=await u.json();}catch(ex){}throw new Error(ue?.error?.message||'\u041E\u0448\u0438\u0431\u043A\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0438: '+u.status);}
     var ud=await u.json();
 
     pf.style.width='85%';stEl.textContent='\u0423\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0430\u2026';
 
-    await fetch('/api/users/me',{method:'PUT',headers:Object.assign({'Authorization':'Bearer '+token,'Content-Type':'application/json'},hd),body:JSON.stringify({bannerId:ud.id}),credentials:'include'});
+    var setR=await fetch('/api/users/me',{method:'PUT',headers:Object.assign({'Authorization':'Bearer '+token,'Content-Type':'application/json'},hd),body:JSON.stringify({bannerId:ud.id}),credentials:'include'});
+    if(!setR.ok){var se=null;try{se=await setR.json();}catch(ex){}throw new Error(se?.error?.message||'\u041E\u0448\u0438\u0431\u043A\u0430 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0438: '+setR.status);}
 
     pf.style.width='100%';
-    stEl.className='st ok';stEl.textContent='\u2705 \u0413\u043E\u0442\u043E\u0432\u043E!';
+    stEl.className='st ok';stEl.textContent='\u0413\u043E\u0442\u043E\u0432\u043E!';
     upBtn.style.display='none';
     clBtn.textContent='\u041E\u0431\u043D\u043E\u0432\u0438\u0442\u044C';clBtn.className='bt bg';
     clBtn.onclick=function(){location.reload();};
